@@ -34,9 +34,9 @@ function AuthGate() {
 
     if (session && profile && inAuthGroup) {
       // Keep new users on set-password until they complete account setup
-      if (segments[1] === 'set-password') return;
+      if ((segments as string[])[1] === 'set-password') return;
       // Keep owners on onboarding until they finish setup
-      if (segments[1] === 'onboarding') return;
+      if ((segments as string[])[1] === 'onboarding') return;
 
       // New owner with no company → start onboarding
       if (profile.role === 'owner' && !profile.company_id) {

@@ -103,6 +103,10 @@ export interface Schedule {
   end_time: string;
   status: ScheduleStatus;
   created_by: string | null;
+  /** JSON recurrence rule — see RecurrenceRule in recurrence.ts */
+  recurrence_rule: Record<string, unknown> | null;
+  /** UUID linking all instances of the same recurring series */
+  recurring_series_id: string | null;
 }
 
 export interface TimeEntry {

@@ -33,6 +33,13 @@ export default function EmployeeLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="availability"
+        options={{
+          title: 'Availability',
+          tabBarIcon: ({ color, size }) => <Ionicons name="calendar-clear-outline" size={size} color={color} />,
+        }}
+      />
       <Tabs.Screen name="notifications" options={{ href: null, title: 'Notifications' }} />
       <Tabs.Screen
         name="visit/[id]"
