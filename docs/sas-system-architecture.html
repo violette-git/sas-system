@@ -84,6 +84,23 @@ const CURRENT_FEATURES = {
     { name: "SignatureScreen (employee: capture signature, save to document)", done: true },
     { name: "Phase 3 DB migration (case_notes, note_templates, template_fields, document_signatures tables)", done: true },
   ]},
+  phase2: { label: "Phase 2 — Scheduling & Calendar", color: COLORS.green, items: [
+    { name: "Calendar view (day/week/month, colored blocks, conflict dots)", done: true },
+    { name: "Recurring schedules (daily/weekly/biweekly/monthly rules)", done: true },
+    { name: "Schedule conflict detection (auto-detect, warning modal)", done: true },
+    { name: "Availability management (weekly grid, time-off requests)", done: true },
+    { name: "Bulk schedule creation (3-step modal, preview + confirm)", done: true },
+  ]},
+  phase6: { label: "Phase 6 — Enterprise & Scale", color: COLORS.red, items: [
+    { name: "White-label theming (ThemeProvider, BrandingScreen, ColorPicker, LogoUpload)", done: true },
+    { name: "Audit log viewer (filterable, searchable, paginated, diff viewer)", done: true },
+    { name: "logAudit() helper + domain wrappers (schedule, notes, docs, users, branding)", done: true },
+    { name: "Offline mode (SyncQueue, useOfflineSync, OfflineBanner, OfflineProvider)", done: true },
+    { name: "Role permissions granularity (11 keys, PermissionGate, PermissionsScreen)", done: true },
+    { name: "Multi-language i18n (English + Spanish, LanguagePicker, I18nProvider)", done: true },
+    { name: "GPS & Geofencing (Haversine check, GeofenceWarning modal, clock-in GPS capture)", done: true },
+    { name: "Phase 6 DB migrations (branding columns, logos bucket, permissions JSONB, geofence radius, client lat/lon)", done: true },
+  ]},
 };
 
 const PLANNED_FEATURES = [
@@ -109,27 +126,27 @@ const PLANNED_FEATURES = [
     { name: "\u2705 E-Signatures", desc: "In-app signature capture for consent forms, service agreements", priority: "P2" },
     { name: "\u2705 Case Note Review/Approval", desc: "Admin review queue, approve/reject/request-revision workflow", priority: "P1" },
   ]},
-  { phase: "Phase 4 — Payroll & Billing", color: COLORS.amber, features: [
-    { name: "Timesheet Summary", desc: "Weekly/biweekly timesheet view grouped by employee, auto-calculated from time entries", priority: "P0" },
-    { name: "Pay Rate Configuration", desc: "Per-employee pay rates, overtime rules, holiday multipliers", priority: "P0" },
-    { name: "Payroll Export", desc: "Generate CSV/PDF for ADP, Gusto, QuickBooks integration", priority: "P1" },
-    { name: "Invoice Generation", desc: "Auto-generate invoices per client based on completed visits and authorized hours", priority: "P1" },
-    { name: "Authorization Tracking", desc: "Track approved hours per client, alert when nearing limits, prevent over-scheduling", priority: "P0" },
+  { phase: "Phase 4 — Payroll & Billing \u2705 COMPLETE", color: COLORS.amber, features: [
+    { name: "\u2705 Timesheet Summary", desc: "Weekly/biweekly timesheet view grouped by employee, auto-calculated from time entries", priority: "P0" },
+    { name: "\u2705 Pay Rate Configuration", desc: "Per-employee pay rates, overtime rules, holiday multipliers", priority: "P0" },
+    { name: "\u2705 Payroll Export", desc: "Generate CSV/PDF for ADP, Gusto, QuickBooks integration", priority: "P1" },
+    { name: "\u2705 Invoice Generation", desc: "Auto-generate invoices per client based on completed visits and authorized hours", priority: "P1" },
+    { name: "\u2705 Authorization Tracking", desc: "Track approved hours per client, alert when nearing limits, prevent over-scheduling", priority: "P0" },
   ]},
-  { phase: "Phase 5 — Reporting & Analytics", color: COLORS.pink, features: [
-    { name: "Admin Dashboard Charts", desc: "Revenue trends, hours by employee, visits by client, utilization rates", priority: "P0" },
-    { name: "Employee Performance", desc: "On-time rate, visit completion, hours logged vs scheduled", priority: "P1" },
-    { name: "Client Reports", desc: "Service history, authorization usage, visit frequency per client", priority: "P1" },
-    { name: "Export Reports", desc: "Download PDF/Excel reports for stakeholders, Medicaid/DHR audits", priority: "P1" },
-    { name: "Owner Cross-Company Analytics", desc: "Compare metrics across all tenant companies, identify top/bottom performers", priority: "P2" },
+  { phase: "Phase 5 — Reporting & Analytics \u2705 COMPLETE", color: COLORS.pink, features: [
+    { name: "\u2705 Admin Dashboard Charts", desc: "Revenue trends, hours by employee, visits by client, utilization rates", priority: "P0" },
+    { name: "\u2705 Employee Performance", desc: "On-time rate, visit completion, hours logged vs scheduled", priority: "P1" },
+    { name: "\u2705 Client Reports", desc: "Service history, authorization usage, visit frequency per client", priority: "P1" },
+    { name: "\u2705 Export Reports", desc: "Download PDF/Excel reports for stakeholders, Medicaid/DHR audits", priority: "P1" },
+    { name: "\u2705 Owner Cross-Company Analytics", desc: "Compare metrics across all tenant companies, identify top/bottom performers", priority: "P2" },
   ]},
-  { phase: "Phase 6 — Platform & Scale", color: COLORS.red, features: [
-    { name: "White-Label Theming", desc: "Per-company logo, accent color, brand name — configurable via admin settings", priority: "P0" },
-    { name: "Role Permissions Granularity", desc: "Custom permission sets beyond owner/admin/employee (e.g., supervisor, billing-only)", priority: "P1" },
-    { name: "Audit Log", desc: "Track all data changes with who/what/when for compliance", priority: "P1" },
-    { name: "Multi-language (i18n)", desc: "English + Spanish to start, per-company default language setting", priority: "P2" },
-    { name: "Offline Mode", desc: "Queue actions when offline, sync on reconnect — critical for field workers", priority: "P1" },
-    { name: "GPS & Geofencing", desc: "Verify clock-in location matches client address, mileage tracking", priority: "P2" },
+  { phase: "Phase 6 — Platform & Scale \u2705 COMPLETE", color: COLORS.red, features: [
+    { name: "\u2705 White-Label Theming", desc: "Per-company logo, accent color, brand name — configurable via admin settings", priority: "P0" },
+    { name: "\u2705 Role Permissions Granularity", desc: "Custom permission sets beyond owner/admin/employee (e.g., supervisor, billing-only)", priority: "P1" },
+    { name: "\u2705 Audit Log", desc: "Track all data changes with who/what/when for compliance", priority: "P1" },
+    { name: "\u2705 Multi-language (i18n)", desc: "English + Spanish to start, per-company default language setting", priority: "P2" },
+    { name: "\u2705 Offline Mode", desc: "Queue actions when offline, sync on reconnect — critical for field workers", priority: "P1" },
+    { name: "\u2705 GPS & Geofencing", desc: "Verify clock-in location matches client address, mileage tracking", priority: "P2" },
   ]},
 ];
 
@@ -149,6 +166,10 @@ const DB_TABLES = [
   { name: "audit_log", desc: "Change tracking with old/new JSON for compliance", exists: true },
   { name: "templates", desc: "Configurable case note templates with JSON fields", exists: true },
   { name: "availability", desc: "Employee working hours by day of week", exists: true },
+  { name: "case_notes", desc: "Visit notes with status workflow and template data", exists: true },
+  { name: "note_templates", desc: "Admin-configurable note templates with JSON fields", exists: true },
+  { name: "document_signatures", desc: "E-signature records linked to documents", exists: true },
+  { name: "invoice_line_items", desc: "Line items for billing records (Phase 4)", exists: true },
 ];
 
 function PriorityBadge({ priority }) {
