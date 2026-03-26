@@ -1,0 +1,62 @@
+---
+title: SaaS System — Current App Flow
+---
+flowchart TB
+    subgraph AUTH["Authentication"]
+        START([App Launch]) --> GATE{Auth Gate}
+        GATE -->|No Session| LOGIN[Login Screen]
+        LOGIN -->|Company Code + Email + Password| SIGNIN[Sign In via Supabase]
+        GATE -->|Invite/Recovery Link| SETPW[Set Password Screen]
+        SETPW -->|Password Set| SIGNIN
+        SIGNIN --> RESOLVE{Resolve Role}
+    end
+
+    subgraph OWNER["Owner Portal"]
+        direction TB
+        RESOLVE -->|role = owner| O_DASH[Owner Dashboard]
+        O_DASH --> O_COMPANIES[Company List]
+        O_COMPANIES -->|Create| O_NEW_CO[Create Company Modal]
+        O_DASH --> O_SETTINGS[Owner Settings]
+        O_SETTINGS --> O_SIGNOUT[Sign Out]
+    end
+
+    subgraph ADMIN["Admin Portal"]
+        direction TB
+        RESOLVE -->|role = admin| A_DASH[Admin Dashboard]
+        A_DASH --> A_KPI[KPI Stats: Visits, Hours, Clients]
+        A_DASH --> A_CLIENTS[Clients Tab]
+        A_CLIENTS --> A_CLIENT_DETAIL[Client Detail]
+        A_CLIENT_DETAIL --> A_CLIENT_AUTHS[Client Authorizations]
+        A_DASH --> A_SCHEDULES[Schedules Tab]
+        A_SCHEDULES --> A_SCHED_DETAIL[Schedule Detail]
+        A_SCHED_DETAIL --> A_TIME[Time Entries]
+        A_SCHED_DETAIL --> A_NOTES[Visit Notes]
+        A_DASH --> A_EMPLOYEES[Employees Tab]
+        A_EMPLOYEES -->|Invite| A_INVITE[Invite Employee Modal]
+        A_DASH --> A_SETTINGS[Settings Tab]
+        A_SETTINGS --> A_SERVICES[Service Types CRUD]
+    end
+
+    subgraph EMPLOYEE["Employee Portal"]
+        direction TB
+        RESOLVE -->|role = employee| E_DASH[Employee Dashboard]
+        E_DASH --> E_VISITS[My Visits List]
+        E_VISITS --> E_VISIT_DETAIL[Visit Detail]
+        E_VISIT_DETAIL --> E_ADD_NOTE[Add Visit Note]
+        E_DASH --> E_CLOCK[Clock In/Out Tab]
+        E_CLOCK --> E_PICK_VISIT[Select Visit to Clock Into]
+        E_PICK_VISIT --> E_CLOCKED_IN[Clocked In - Live Timer]
+        E_CLOCKED_IN --> E_CLOCK_OUT[Clock Out]
+    end
+
+    O_SIGNOUT --> LOGIN
+
+    classDef auth fill:#6366F1,stroke:#4F46E5,color:#fff
+    classDef owner fill:#F59E0B,stroke:#D97706,color:#fff
+    classDef admin fill:#10B981,stroke:#059669,color:#fff
+    classDef employee fill:#3B82F6,stroke:#2563EB,color:#fff
+
+    class START,GATE,LOGIN,SIGNIN,SETPW,RESOLVE auth
+    class O_DASH,O_COMPANIES,O_NEW_CO,O_SETTINGS,O_SIGNOUT owner
+    class A_DASH,A_KPI,A_CLIENTS,A_CLIENT_DETAIL,A_CLIENT_AUTHS,A_SCHEDULES,A_SCHED_DETAIL,A_TIME,A_NOTES,A_EMPLOYEES,A_INVITE,A_SETTINGS,A_SERVICES admin
+    class E_DASH,E_VISITS,E_VISIT_DETAIL,E_ADD_NOTE,E_CLOCK,E_PICK_VISIT,E_CLOCKED_IN,E_CLOCK_OUT employee

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { View, StatusBar } from 'react-native';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
@@ -42,7 +43,10 @@ function AuthGate() {
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthGate />
+      <View style={{ flex: 1, backgroundColor: '#0D0F12' }}>
+        <StatusBar barStyle="light-content" backgroundColor="#0D0F12" />
+        <AuthGate />
+      </View>
     </QueryClientProvider>
   );
 }

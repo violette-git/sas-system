@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView,
-  Platform, ScrollView,
+  Platform, ScrollView, StatusBar,
 } from 'react-native';
 import { useSignIn } from '@/features/auth/hooks/useSignIn';
 
@@ -21,6 +21,7 @@ export default function LoginScreen() {
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <StatusBar barStyle="light-content" backgroundColor="#0D0F12" />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
         <View style={styles.header}>
@@ -39,6 +40,7 @@ export default function LoginScreen() {
             <TextInput
               style={[styles.input, fieldError('accessCode') && styles.inputError]}
               placeholder="e.g. ACME-A1B2"
+              placeholderTextColor="#4B5563"
               autoCapitalize="characters"
               autoCorrect={false}
               value={accessCode}
@@ -55,6 +57,7 @@ export default function LoginScreen() {
             <TextInput
               style={[styles.input, fieldError('email') && styles.inputError]}
               placeholder="you@company.com"
+              placeholderTextColor="#4B5563"
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -72,6 +75,7 @@ export default function LoginScreen() {
             <TextInput
               style={[styles.input, fieldError('password') && styles.inputError]}
               placeholder="••••••••"
+              placeholderTextColor="#4B5563"
               secureTextEntry
               value={password}
               onChangeText={setPassword}
@@ -105,36 +109,36 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  root:   { flex: 1, backgroundColor: '#f8f9fa' },
+  root:   { flex: 1, backgroundColor: '#0D0F12' },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
 
   header:   { marginBottom: 36, alignItems: 'center' },
-  title:    { fontSize: 28, fontWeight: '700', color: '#111827' },
-  subtitle: { fontSize: 15, color: '#6b7280', marginTop: 4 },
+  title:    { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
+  subtitle: { fontSize: 15, color: '#9CA3AF', marginTop: 4 },
 
   form:  { gap: 16 },
   field: { gap: 4 },
 
   labelRow:  { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  label:     { fontSize: 14, fontWeight: '600', color: '#374151' },
+  label:     { fontSize: 14, fontWeight: '600', color: '#E2E8F0' },
   labelHint: { fontSize: 11, color: '#9ca3af', flexShrink: 1 },
 
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: '#141720',
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: '#2D3148',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#111827',
+    color: '#FFFFFF',
   },
   inputError:   { borderColor: '#ef4444' },
   errorText:    { fontSize: 12, color: '#ef4444' },
   errorGeneral: { textAlign: 'center', fontSize: 14 },
 
   button: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#6366F1',
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
