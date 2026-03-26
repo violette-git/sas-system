@@ -1,3 +1,4 @@
+import 'react-native-url-polyfill/auto';
 import { useEffect } from 'react';
 import { View, StatusBar } from 'react-native';
 import { Slot, useRouter, useSegments } from 'expo-router';
@@ -31,23 +32,9 @@ function AuthGate() {
       return;
     }
 
-    // Owner with no company outside auth group → onboarding
-    if (session && profile && profile.role === 'owner' && !profile.company_id && !inAuthGroup) {
-      router.replace('/(auth)/onboarding');
-      return;
-    }
-
     if (session && profile && inAuthGroup) {
       // Keep new users on set-password until they complete account setup
       if (segments[1] === 'set-password') return;
-      // Keep owners on onboarding until they finish setup
-      if (segments[1] === 'onboarding') return;
-
-      // New owner with no company → start onboarding
-      if (profile.role === 'owner' && !profile.company_id) {
-        router.replace('/(auth)/onboarding');
-        return;
-      }
 
       switch (profile.role) {
         case 'owner':    router.replace('/(owner)');    break;
