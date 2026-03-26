@@ -27,11 +27,15 @@ const CURRENT_FEATURES = {
     { name: "Role-based routing (Owner/Admin/Employee)", done: true },
     { name: "Supabase session management", done: true },
     { name: "AuthGate redirect logic", done: true },
+    { name: "Forgot Password (magic link reset)", done: true },
+    { name: "Onboarding Wizard (company + services + invite)", done: true },
   ]},
   owner: { label: "Owner Portal", color: COLORS.amber, items: [
     { name: "Company list view", done: true },
     { name: "Create company modal", done: true },
     { name: "Owner settings & sign out", done: true },
+    { name: "Profile management & change password", done: true },
+    { name: "Notification bell & notifications screen", done: true },
   ]},
   admin: { label: "Admin Portal", color: COLORS.green, items: [
     { name: "Dashboard with KPI stats", done: true },
@@ -41,22 +45,39 @@ const CURRENT_FEATURES = {
     { name: "Schedule detail (time entries, notes)", done: true },
     { name: "Employee management & invite", done: true },
     { name: "Settings & service types", done: true },
+    { name: "Profile management & notification prefs", done: true },
+    { name: "Notification bell & notifications screen", done: true },
+    { name: "Skeleton loading & pull-to-refresh", done: true },
+    { name: "Empty states & error boundaries", done: true },
   ]},
   employee: { label: "Employee Portal", color: COLORS.blue, items: [
     { name: "My visits list", done: true },
     { name: "Visit detail & notes", done: true },
     { name: "Clock in/out with live timer", done: true },
+    { name: "Profile management & change password", done: true },
+    { name: "Notification bell & notifications screen", done: true },
+    { name: "Skeleton loading & pull-to-refresh", done: true },
+    { name: "Empty states & error boundaries", done: true },
+  ]},
+  platform: { label: "Phase 1 — Core Polish", color: COLORS.pink, items: [
+    { name: "ErrorBoundary component (catch + retry)", done: true },
+    { name: "EmptyState component (icon + title + action)", done: true },
+    { name: "ErrorState component (error display + retry)", done: true },
+    { name: "SkeletonDashboard / SkeletonList / SkeletonDetail", done: true },
+    { name: "NotificationBell with unread count badge", done: true },
+    { name: "useNotifications hook (React Query + Supabase realtime)", done: true },
+    { name: "9 new database tables with RLS policies", done: true },
   ]},
 };
 
 const PLANNED_FEATURES = [
-  { phase: "Phase 1 — Core Polish", color: COLORS.indigo, features: [
-    { name: "Onboarding Flow", desc: "First-time setup wizard for owners: create company, configure services, invite first admin", priority: "P0" },
-    { name: "Forgot Password", desc: "Password reset flow via Supabase magic link / email OTP", priority: "P0" },
-    { name: "Profile Management", desc: "Edit name, avatar upload, change password, notification preferences for all roles", priority: "P0" },
-    { name: "Real-time Notifications", desc: "Push + in-app notifications for schedule changes, clock events, new assignments", priority: "P1" },
-    { name: "Error Handling & Empty States", desc: "Graceful error boundaries, retry logic, illustrated empty states across all screens", priority: "P1" },
-    { name: "Loading & Skeleton States", desc: "Skeleton screens for all data-fetching views, pull-to-refresh on mobile", priority: "P1" },
+  { phase: "Phase 1 — Core Polish \u2705 COMPLETE", color: COLORS.indigo, features: [
+    { name: "\u2705 Onboarding Flow", desc: "Multi-step wizard: company creation, service config, admin invite, success screen", priority: "P0" },
+    { name: "\u2705 Forgot Password", desc: "Password reset via Supabase magic link with confirmation screen", priority: "P0" },
+    { name: "\u2705 Profile Management", desc: "Edit name/phone, change password, notification preferences for all roles", priority: "P0" },
+    { name: "\u2705 Real-time Notifications", desc: "Bell icon with unread badge, notification list, Supabase realtime subscription", priority: "P1" },
+    { name: "\u2705 Error Handling & Empty States", desc: "ErrorBoundary, EmptyState, ErrorState components across all screens", priority: "P1" },
+    { name: "\u2705 Loading & Skeleton States", desc: "SkeletonDashboard/List/Detail, pull-to-refresh on all scrollable lists", priority: "P1" },
   ]},
   { phase: "Phase 2 — Scheduling & Calendar", color: COLORS.green, features: [
     { name: "Calendar View", desc: "Day/week/month calendar with drag-to-create, color-coded by client or employee", priority: "P0" },
@@ -140,68 +161,83 @@ function Arrow({ x1, y1, x2, y2, color="#4B5563" }) {
 function FlowDiagram({ activeSection, setActiveSection }) {
   const W=130, H=32;
   return (
-    <svg viewBox="0 0 800 520" style={{ width:"100%", maxWidth:800 }}>
+    <svg viewBox="0 0 800 600" style={{ width:"100%", maxWidth:800 }}>
       <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth={6} markerHeight={6} orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4B5563" /></marker></defs>
-      <rect x={10} y={10} width={780} height={100} rx={12} fill={COLORS.indigo+"10"} stroke={COLORS.indigo+"40"} strokeWidth={1} />
+      <rect x={10} y={10} width={780} height={120} rx={12} fill={COLORS.indigo+"10"} stroke={COLORS.indigo+"40"} strokeWidth={1} />
       <text x={24} y={32} fill={COLORS.indigo} fontSize={12} fontWeight={700} fontFamily="Inter, system-ui, sans-serif">AUTHENTICATION</text>
-      <FlowNode label="App Launch" color={COLORS.indigo} x={30} y={50} w={100} h={H} />
-      <Arrow x1={130} y1={66} x2={150} y2={66} color={COLORS.indigo} />
-      <FlowNode label="Auth Gate" color={COLORS.indigo} x={150} y={50} w={100} h={H} />
-      <Arrow x1={250} y1={66} x2={270} y2={66} color={COLORS.indigo} />
-      <FlowNode label="Login" color={COLORS.indigo} x={270} y={50} w={90} h={H} active />
-      <Arrow x1={360} y1={66} x2={380} y2={66} color={COLORS.indigo} />
-      <FlowNode label="Sign In" color={COLORS.indigo} x={380} y={50} w={90} h={H} />
-      <Arrow x1={470} y1={66} x2={490} y2={66} color={COLORS.indigo} />
-      <FlowNode label="Resolve Role" color={COLORS.indigo} x={490} y={50} w={110} h={H} />
-      <Arrow x1={545} y1={82} x2={140} y2={150} color={COLORS.amber} />
-      <Arrow x1={545} y1={82} x2={400} y2={150} color={COLORS.green} />
-      <Arrow x1={545} y1={82} x2={660} y2={150} color={COLORS.blue} />
+      <FlowNode label="App Launch" color={COLORS.indigo} x={30} y={45} w={100} h={H} />
+      <Arrow x1={130} y1={61} x2={150} y2={61} color={COLORS.indigo} />
+      <FlowNode label="Auth Gate" color={COLORS.indigo} x={150} y={45} w={100} h={H} />
+      <Arrow x1={250} y1={61} x2={270} y2={61} color={COLORS.indigo} />
+      <FlowNode label="Login" color={COLORS.indigo} x={270} y={45} w={90} h={H} active />
+      <Arrow x1={360} y1={61} x2={380} y2={61} color={COLORS.indigo} />
+      <FlowNode label="Sign In" color={COLORS.indigo} x={380} y={45} w={90} h={H} />
+      <Arrow x1={470} y1={61} x2={490} y2={61} color={COLORS.indigo} />
+      <FlowNode label="Resolve Role" color={COLORS.indigo} x={490} y={45} w={110} h={H} />
+      {/* Phase 1 new auth screens */}
+      <FlowNode label="Forgot Password" color={COLORS.pink} x={270} y={90} w={W} h={H} />
+      <FlowNode label="Onboarding" color={COLORS.pink} x={620} y={45} w={W} h={H} />
+      <Arrow x1={315} y1={77} x2={315} y2={90} color={COLORS.pink} />
+      <Arrow x1={600} y1={61} x2={620} y2={61} color={COLORS.pink} />
+      <Arrow x1={545} y1={77} x2={140} y2={155} color={COLORS.amber} />
+      <Arrow x1={545} y1={77} x2={400} y2={155} color={COLORS.green} />
+      <Arrow x1={545} y1={77} x2={660} y2={155} color={COLORS.blue} />
 
-      <rect x={10} y={130} width={250} height={370} rx={12} fill={COLORS.amber+"08"} stroke={COLORS.amber+"40"} strokeWidth={1} />
-      <text x={24} y={152} fill={COLORS.amber} fontSize={12} fontWeight={700} fontFamily="Inter, system-ui, sans-serif">OWNER PORTAL</text>
-      <FlowNode label="Dashboard" color={COLORS.amber} x={30} y={165} w={W} h={H} active={activeSection==="owner"} onClick={()=>setActiveSection("owner")} />
-      <FlowNode label="Company List" color={COLORS.amber} x={30} y={210} w={W} h={H} />
-      <FlowNode label="Create Company" color={COLORS.amber} x={30} y={255} w={W} h={H} />
-      <FlowNode label="Settings" color={COLORS.amber} x={30} y={300} w={W} h={H} />
-      <FlowNode label="Sign Out" color={COLORS.amber} x={30} y={345} w={W} h={H} />
-      <Arrow x1={95} y1={197} x2={95} y2={210} color={COLORS.amber} />
-      <Arrow x1={95} y1={242} x2={95} y2={255} color={COLORS.amber} />
-      <Arrow x1={95} y1={287} x2={95} y2={300} color={COLORS.amber} />
-      <Arrow x1={95} y1={332} x2={95} y2={345} color={COLORS.amber} />
+      <rect x={10} y={140} width={250} height={440} rx={12} fill={COLORS.amber+"08"} stroke={COLORS.amber+"40"} strokeWidth={1} />
+      <text x={24} y={162} fill={COLORS.amber} fontSize={12} fontWeight={700} fontFamily="Inter, system-ui, sans-serif">OWNER PORTAL</text>
+      <FlowNode label="Dashboard" color={COLORS.amber} x={30} y={175} w={W} h={H} active={activeSection==="owner"} onClick={()=>setActiveSection("owner")} />
+      <FlowNode label="Company List" color={COLORS.amber} x={30} y={220} w={W} h={H} />
+      <FlowNode label="Create Company" color={COLORS.amber} x={30} y={265} w={W} h={H} />
+      <FlowNode label="Profile" color={COLORS.pink} x={30} y={310} w={W} h={H} />
+      <FlowNode label="Notifications" color={COLORS.pink} x={30} y={355} w={W} h={H} />
+      <FlowNode label="Settings" color={COLORS.amber} x={30} y={400} w={W} h={H} />
+      <FlowNode label="Sign Out" color={COLORS.amber} x={30} y={445} w={W} h={H} />
+      <Arrow x1={95} y1={207} x2={95} y2={220} color={COLORS.amber} />
+      <Arrow x1={95} y1={252} x2={95} y2={265} color={COLORS.amber} />
+      <Arrow x1={95} y1={297} x2={95} y2={310} color={COLORS.pink} />
+      <Arrow x1={95} y1={342} x2={95} y2={355} color={COLORS.pink} />
+      <Arrow x1={95} y1={387} x2={95} y2={400} color={COLORS.amber} />
+      <Arrow x1={95} y1={432} x2={95} y2={445} color={COLORS.amber} />
 
-      <rect x={270} y={130} width={250} height={370} rx={12} fill={COLORS.green+"08"} stroke={COLORS.green+"40"} strokeWidth={1} />
-      <text x={284} y={152} fill={COLORS.green} fontSize={12} fontWeight={700} fontFamily="Inter, system-ui, sans-serif">ADMIN PORTAL</text>
-      <FlowNode label="Dashboard + KPIs" color={COLORS.green} x={290} y={165} w={W} h={H} active={activeSection==="admin"} onClick={()=>setActiveSection("admin")} />
-      <FlowNode label="Clients" color={COLORS.green} x={290} y={210} w={W} h={H} />
-      <FlowNode label="Client Detail" color={COLORS.green} x={290} y={255} w={W} h={H} />
-      <FlowNode label="Authorizations" color={COLORS.green} x={290} y={300} w={W} h={H} />
-      <FlowNode label="Schedules" color={COLORS.green} x={290} y={345} w={W} h={H} />
-      <FlowNode label="Schedule Detail" color={COLORS.green} x={290} y={390} w={W} h={H} />
-      <FlowNode label="Employees" color={COLORS.green} x={290} y={435} w={W} h={H} />
-      <FlowNode label="Settings" color={COLORS.green} x={290} y={475} w={W} h={H} />
-      <Arrow x1={355} y1={197} x2={355} y2={210} color={COLORS.green} />
-      <Arrow x1={355} y1={242} x2={355} y2={255} color={COLORS.green} />
-      <Arrow x1={355} y1={287} x2={355} y2={300} color={COLORS.green} />
-      <Arrow x1={355} y1={332} x2={355} y2={345} color={COLORS.green} />
-      <Arrow x1={355} y1={377} x2={355} y2={390} color={COLORS.green} />
-      <Arrow x1={355} y1={422} x2={355} y2={435} color={COLORS.green} />
-      <Arrow x1={355} y1={467} x2={355} y2={475} color={COLORS.green} />
+      <rect x={270} y={140} width={250} height={440} rx={12} fill={COLORS.green+"08"} stroke={COLORS.green+"40"} strokeWidth={1} />
+      <text x={284} y={162} fill={COLORS.green} fontSize={12} fontWeight={700} fontFamily="Inter, system-ui, sans-serif">ADMIN PORTAL</text>
+      <FlowNode label="Dashboard + KPIs" color={COLORS.green} x={290} y={175} w={W} h={H} active={activeSection==="admin"} onClick={()=>setActiveSection("admin")} />
+      <FlowNode label="Clients" color={COLORS.green} x={290} y={220} w={W} h={H} />
+      <FlowNode label="Client Detail" color={COLORS.green} x={290} y={265} w={W} h={H} />
+      <FlowNode label="Authorizations" color={COLORS.green} x={290} y={310} w={W} h={H} />
+      <FlowNode label="Schedules" color={COLORS.green} x={290} y={355} w={W} h={H} />
+      <FlowNode label="Schedule Detail" color={COLORS.green} x={290} y={400} w={W} h={H} />
+      <FlowNode label="Employees" color={COLORS.green} x={290} y={445} w={W} h={H} />
+      <FlowNode label="Notifications" color={COLORS.pink} x={290} y={490} w={W} h={H} />
+      <FlowNode label="Profile + Settings" color={COLORS.pink} x={290} y={535} w={W} h={H} />
+      <Arrow x1={355} y1={207} x2={355} y2={220} color={COLORS.green} />
+      <Arrow x1={355} y1={252} x2={355} y2={265} color={COLORS.green} />
+      <Arrow x1={355} y1={297} x2={355} y2={310} color={COLORS.green} />
+      <Arrow x1={355} y1={342} x2={355} y2={355} color={COLORS.green} />
+      <Arrow x1={355} y1={387} x2={355} y2={400} color={COLORS.green} />
+      <Arrow x1={355} y1={432} x2={355} y2={445} color={COLORS.green} />
+      <Arrow x1={355} y1={477} x2={355} y2={490} color={COLORS.pink} />
+      <Arrow x1={355} y1={522} x2={355} y2={535} color={COLORS.pink} />
 
-      <rect x={530} y={130} width={260} height={370} rx={12} fill={COLORS.blue+"08"} stroke={COLORS.blue+"40"} strokeWidth={1} />
-      <text x={544} y={152} fill={COLORS.blue} fontSize={12} fontWeight={700} fontFamily="Inter, system-ui, sans-serif">EMPLOYEE PORTAL</text>
-      <FlowNode label="My Visits" color={COLORS.blue} x={550} y={165} w={W} h={H} active={activeSection==="employee"} onClick={()=>setActiveSection("employee")} />
-      <FlowNode label="Visit Detail" color={COLORS.blue} x={550} y={210} w={W} h={H} />
-      <FlowNode label="Add Note" color={COLORS.blue} x={550} y={255} w={W} h={H} />
-      <FlowNode label="Clock In/Out" color={COLORS.blue} x={550} y={300} w={W} h={H} />
-      <FlowNode label="Select Visit" color={COLORS.blue} x={550} y={345} w={W} h={H} />
-      <FlowNode label="Live Timer" color={COLORS.blue} x={550} y={390} w={W} h={H} />
-      <FlowNode label="Clock Out" color={COLORS.blue} x={550} y={435} w={W} h={H} />
-      <Arrow x1={615} y1={197} x2={615} y2={210} color={COLORS.blue} />
-      <Arrow x1={615} y1={242} x2={615} y2={255} color={COLORS.blue} />
-      <Arrow x1={615} y1={287} x2={615} y2={300} color={COLORS.blue} />
-      <Arrow x1={615} y1={332} x2={615} y2={345} color={COLORS.blue} />
-      <Arrow x1={615} y1={377} x2={615} y2={390} color={COLORS.blue} />
-      <Arrow x1={615} y1={422} x2={615} y2={435} color={COLORS.blue} />
+      <rect x={530} y={140} width={260} height={440} rx={12} fill={COLORS.blue+"08"} stroke={COLORS.blue+"40"} strokeWidth={1} />
+      <text x={544} y={162} fill={COLORS.blue} fontSize={12} fontWeight={700} fontFamily="Inter, system-ui, sans-serif">EMPLOYEE PORTAL</text>
+      <FlowNode label="My Visits" color={COLORS.blue} x={550} y={175} w={W} h={H} active={activeSection==="employee"} onClick={()=>setActiveSection("employee")} />
+      <FlowNode label="Visit Detail" color={COLORS.blue} x={550} y={220} w={W} h={H} />
+      <FlowNode label="Add Note" color={COLORS.blue} x={550} y={265} w={W} h={H} />
+      <FlowNode label="Clock In/Out" color={COLORS.blue} x={550} y={310} w={W} h={H} />
+      <FlowNode label="Select Visit" color={COLORS.blue} x={550} y={355} w={W} h={H} />
+      <FlowNode label="Live Timer" color={COLORS.blue} x={550} y={400} w={W} h={H} />
+      <FlowNode label="Clock Out" color={COLORS.blue} x={550} y={445} w={W} h={H} />
+      <FlowNode label="Notifications" color={COLORS.pink} x={550} y={490} w={W} h={H} />
+      <FlowNode label="Profile + Settings" color={COLORS.pink} x={550} y={535} w={W} h={H} />
+      <Arrow x1={615} y1={207} x2={615} y2={220} color={COLORS.blue} />
+      <Arrow x1={615} y1={252} x2={615} y2={265} color={COLORS.blue} />
+      <Arrow x1={615} y1={297} x2={615} y2={310} color={COLORS.blue} />
+      <Arrow x1={615} y1={342} x2={615} y2={355} color={COLORS.blue} />
+      <Arrow x1={615} y1={387} x2={615} y2={400} color={COLORS.blue} />
+      <Arrow x1={615} y1={432} x2={615} y2={445} color={COLORS.blue} />
+      <Arrow x1={615} y1={477} x2={615} y2={490} color={COLORS.pink} />
+      <Arrow x1={615} y1={522} x2={615} y2={535} color={COLORS.pink} />
     </svg>
   );
 }
