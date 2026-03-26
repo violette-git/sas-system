@@ -4,16 +4,20 @@ import {
   Modal, TextInput, Alert, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import {
   useServiceTypes, useCreateServiceType, useUpdateServiceType, useToggleServiceType,
 } from '@/features/service-types/hooks/useServiceTypes';
+import { ProfileScreen } from '@/features/profile/screens/ProfileScreen';
 import type { ServiceType } from '@/lib/supabase';
 
 type ModalMode = 'create' | 'edit';
+type Tab = 'profile' | 'services';
 
 export default function AdminSettings() {
-  const { profile, company } = useAuthStore();
+  const { profile, company, clear } = useAuthStore();
+  const [activeTab, setActiveTab] = useState<Tab>('profile');
   const { data: serviceTypes = [], isLoading } = useServiceTypes();
   const createMutation  = useCreateServiceType();
   const updateMutation  = useUpdateServiceType();
@@ -89,23 +93,42 @@ export default function AdminSettings() {
 
   return (
     <View style={styles.container}>
-      {/* Profile card */}
-      <View style={styles.profileCard}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {profile?.full_name?.charAt(0).toUpperCase() ?? '?'}
+      {/* Tab selector */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tabBtn, activeTab === 'profile' && styles.tabBtnActive]}
+          onPress={() => setActiveTab('profile')}
+        >
+          <Text style={[styles.tabBtnText, activeTab === 'profile' && styles.tabBtnTextActive]}>
+            Profile
           </Text>
-        </View>
-        <View>
-          <Text style={styles.profileName}>{profile?.full_name}</Text>
-          <Text style={styles.profileEmail}>{profile?.email}</Text>
-          <View style={styles.roleBadge}>
-            <Text style={styles.roleBadgeText}>{profile?.role?.toUpperCase()}</Text>
-          </View>
-        </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabBtn, activeTab === 'services' && styles.tabBtnActive]}
+          onPress={() => setActiveTab('services')}
+        >
+          <Text style={[styles.tabBtnText, activeTab === 'services' && styles.tabBtnTextActive]}>
+            Service Types
+          </Text>
+        </TouchableOpacity>
       </View>
 
+      {/* Sign out row */}
+      {activeTab === 'profile' && (
+        <View style={styles.profileTabWrap}>
+          <ProfileScreen />
+          <TouchableOpacity
+            style={styles.signOutBtn}
+            onPress={() => { supabase.auth.signOut(); clear(); }}
+          >
+            <Ionicons name="log-out-outline" size={18} color="#fff" />
+            <Text style={styles.signOutText}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Service Types section */}
+      {activeTab === 'services' && <View style={{ flex: 1 }}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Service Types</Text>
         <TouchableOpacity style={styles.addButton} onPress={openCreate}>
@@ -216,12 +239,21 @@ export default function AdminSettings() {
           </View>
         </View>
       </Modal>
+      </View>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container:        { flex: 1, backgroundColor: '#f9fafb' },
+  tabBar:           { flexDirection: 'row', backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
+  tabBtn:           { flex: 1, paddingVertical: 12, alignItems: 'center' },
+  tabBtnActive:     { borderBottomWidth: 2, borderBottomColor: '#2563eb' },
+  tabBtnText:       { fontSize: 14, fontWeight: '500', color: '#6b7280' },
+  tabBtnTextActive: { color: '#2563eb', fontWeight: '700' },
+  profileTabWrap:   { flex: 1 },
+  signOutBtn:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#ef4444', margin: 16, padding: 14, borderRadius: 10 },
+  signOutText:      { color: '#fff', fontWeight: '600', fontSize: 15 },
   profileCard:      { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#fff', margin: 16, borderRadius: 12, padding: 16, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
   avatar:           { width: 52, height: 52, borderRadius: 26, backgroundColor: '#2563eb', justifyContent: 'center', alignItems: 'center' },
   avatarText:       { color: '#fff', fontSize: 22, fontWeight: '700' },

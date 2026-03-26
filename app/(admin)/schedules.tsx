@@ -1,8 +1,10 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  Modal, StyleSheet, ActivityIndicator, ScrollView, TextInput, Alert,
+  Modal, StyleSheet, ActivityIndicator, ScrollView, TextInput, Alert, RefreshControl,
 } from 'react-native';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { SkeletonList } from '@/components/ui/SkeletonList';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -156,20 +158,30 @@ export default function AdminSchedules() {
 
       {/* Day list */}
       {isLoading
-        ? <ActivityIndicator style={styles.loader} color="#2563eb" />
+        ? <SkeletonList count={3} showAvatar={false} />
         : (
           <FlatList
             data={daySchedules}
             keyExtractor={s => s.id}
             renderItem={({ item }) => (
-              <ScheduleCard item={item} onPress={() => router.push(`/(admin)/schedule/${item.id}`)} />
+              <ScheduleCard item={item} onPress={() => router.push({ pathname: '/(admin)/schedule/[id]', params: { id: item.id } })} />
             )}
             contentContainerStyle={styles.list}
+            refreshControl={
+              <RefreshControl
+                refreshing={false}
+                onRefresh={refetch}
+                tintColor="#2563eb"
+                colors={['#2563eb']}
+              />
+            }
             ListEmptyComponent={
-              <View style={styles.empty}>
-                <Ionicons name="calendar-outline" size={48} color="#d1d5db" />
-                <Text style={styles.emptyText}>No visits scheduled</Text>
-              </View>
+              <EmptyState
+                icon="calendar-outline"
+                title="No visits scheduled"
+                description="No visits on this day. Tap + to schedule one."
+                action={{ label: 'Schedule Visit', onPress: () => setModalVisible(true) }}
+              />
             }
           />
         )

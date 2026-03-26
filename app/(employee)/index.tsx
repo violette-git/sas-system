@@ -1,9 +1,11 @@
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useMySchedules } from '@/features/schedules/hooks/useSchedules';
+import { SkeletonList } from '@/components/ui/SkeletonList';
+import { EmptyState } from '@/components/ui/EmptyState';
 import type { ScheduleWithRelations } from '@/features/schedules/hooks/useSchedules';
 
 const STATUS_CONFIG: Record<string, { bg: string; text: string; label: string }> = {
@@ -58,7 +60,7 @@ function VisitCard({ item, onPress }: { item: ScheduleWithRelations; onPress: ()
 export default function EmployeeSchedule() {
   const router = useRouter();
   const { profile, company, clear } = useAuthStore();
-  const { data: schedules, isLoading } = useMySchedules();
+  const { data: schedules, isLoading, isFetching, refetch } = useMySchedules();
 
   const today = new Date(); today.setHours(0,0,0,0);
   const todaySchedules     = (schedules ?? []).filter(s => {
@@ -84,12 +86,20 @@ export default function EmployeeSchedule() {
       </View>
 
       {isLoading
-        ? <ActivityIndicator style={styles.loader} color="#2563eb" />
+        ? <SkeletonList count={4} showAvatar={false} />
         : (
           <FlatList
             data={schedules}
             keyExtractor={s => s.id}
             contentContainerStyle={styles.list}
+            refreshControl={
+              <RefreshControl
+                refreshing={isFetching && !isLoading}
+                onRefresh={refetch}
+                tintColor="#2563eb"
+                colors={['#2563eb']}
+              />
+            }
             ListHeaderComponent={
               schedules?.length === 0 ? null : (
                 <View style={styles.sectionHeader}>
@@ -110,16 +120,16 @@ export default function EmployeeSchedule() {
                       <Text style={styles.sectionTitle}>Upcoming</Text>
                     </View>
                   )}
-                  <VisitCard item={item} onPress={() => router.push(`/(employee)/visit/${item.id}`)} />
+                  <VisitCard item={item} onPress={() => router.push({ pathname: '/(employee)/visit/[id]', params: { id: item.id } })} />
                 </View>
               );
             }}
             ListEmptyComponent={
-              <View style={styles.empty}>
-                <Ionicons name="calendar-outline" size={56} color="#d1d5db" />
-                <Text style={styles.emptyTitle}>No visits this week</Text>
-                <Text style={styles.emptyHint}>Your schedule for the next 7 days will appear here</Text>
-              </View>
+              <EmptyState
+                icon="calendar-outline"
+                title="No visits this week"
+                description="Your schedule for the next 7 days will appear here."
+              />
             }
           />
         )

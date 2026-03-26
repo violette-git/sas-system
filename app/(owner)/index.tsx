@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, TextInput,
-  Modal, StyleSheet, ActivityIndicator, Alert,
+  Modal, StyleSheet, ActivityIndicator, Alert, RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useCompanies, useCreateCompany, useToggleCompany } from '@/features/companies/hooks/useCompanies';
+import { SkeletonList } from '@/components/ui/SkeletonList';
+import { EmptyState } from '@/components/ui/EmptyState';
 import type { Company } from '@/lib/supabase';
 
 export default function OwnerCompanies() {
-  const { data: companies, isLoading } = useCompanies();
+  const { data: companies, isLoading, isFetching, refetch } = useCompanies();
   const createCompany  = useCreateCompany();
   const toggleCompany  = useToggleCompany();
 
@@ -88,19 +90,28 @@ export default function OwnerCompanies() {
 
       {/* List */}
       {isLoading
-        ? <ActivityIndicator style={styles.loader} color="#7c3aed" />
+        ? <SkeletonList count={4} showAvatar={false} />
         : (
           <FlatList
             data={companies}
             keyExtractor={(c) => c.id}
             renderItem={renderCompany}
             contentContainerStyle={styles.list}
+            refreshControl={
+              <RefreshControl
+                refreshing={isFetching && !isLoading}
+                onRefresh={refetch}
+                tintColor="#7c3aed"
+                colors={['#7c3aed']}
+              />
+            }
             ListEmptyComponent={
-              <View style={styles.empty}>
-                <Ionicons name="business-outline" size={48} color="#d1d5db" />
-                <Text style={styles.emptyText}>No companies yet</Text>
-                <Text style={styles.emptyHint}>Tap "New" to add your first client company</Text>
-              </View>
+              <EmptyState
+                icon="business-outline"
+                title="No companies yet"
+                description={'Tap "New" to add your first client company.'}
+                action={{ label: 'Add Company', onPress: () => setModalVisible(true) }}
+              />
             }
           />
         )

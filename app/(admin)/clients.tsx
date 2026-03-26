@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, TextInput,
-  Modal, StyleSheet, ActivityIndicator, Alert, ScrollView,
+  Modal, StyleSheet, ActivityIndicator, Alert, ScrollView, RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import {
   useClients, useCreateClient, useUpdateClient, useDeleteClient,
 } from '@/features/clients/hooks/useClients';
+import { SkeletonList } from '@/components/ui/SkeletonList';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import type { Client, ClientInput } from '@/features/clients/hooks/useClients';
 
 const EMPTY_FORM: ClientInput = {
@@ -17,7 +20,7 @@ const EMPTY_FORM: ClientInput = {
 
 export default function AdminClients() {
   const router = useRouter();
-  const { data: clients, isLoading } = useClients();
+  const { data: clients, isLoading, isFetching, refetch } = useClients();
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
   const deleteClient = useDeleteClient();
@@ -73,7 +76,7 @@ export default function AdminClients() {
     return (
       <TouchableOpacity
         style={styles.card}
-        onPress={() => router.push(`/(admin)/client/${item.id}`)}
+        onPress={() => router.push({ pathname: '/(admin)/client/[id]', params: { id: item.id } })}
         activeOpacity={0.8}
       >
         <View style={styles.cardBody}>
@@ -128,19 +131,28 @@ export default function AdminClients() {
       </View>
 
       {isLoading
-        ? <ActivityIndicator style={styles.loader} color="#2563eb" />
+        ? <SkeletonList count={5} showAvatar={false} />
         : (
           <FlatList
             data={clients}
             keyExtractor={(c) => c.id}
             renderItem={renderClient}
             contentContainerStyle={styles.list}
+            refreshControl={
+              <RefreshControl
+                refreshing={isFetching && !isLoading}
+                onRefresh={refetch}
+                tintColor="#2563eb"
+                colors={['#2563eb']}
+              />
+            }
             ListEmptyComponent={
-              <View style={styles.empty}>
-                <Ionicons name="business-outline" size={48} color="#d1d5db" />
-                <Text style={styles.emptyText}>No clients yet</Text>
-                <Text style={styles.emptyHint}>Tap "New" to add your first jobsite</Text>
-              </View>
+              <EmptyState
+                icon="business-outline"
+                title="No clients yet"
+                description={'Tap "New" to add your first jobsite or client.'}
+                action={{ label: 'Add Client', onPress: openCreate }}
+              />
             }
           />
         )
@@ -236,7 +248,7 @@ export default function AdminClients() {
 
 const styles = StyleSheet.create({
   container:  { flex: 1, backgroundColor: '#f8f9fa' },
-  loader:     { marginTop: 48 },
+  loader:     { marginTop: 48 }, // kept for reference
 
   pageHeader:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingBottom: 12 },
   pageTitle:    { fontSize: 22, fontWeight: '700', color: '#111827' },

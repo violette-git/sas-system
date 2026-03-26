@@ -1,11 +1,14 @@
 import { useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useSchedules } from '@/features/schedules/hooks/useSchedules';
 import { useAuthorizations } from '@/features/authorizations/hooks/useAuthorizations';
+import { SkeletonDashboard } from '@/components/ui/SkeletonDashboard';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -20,12 +23,12 @@ export default function AdminDashboard() {
   }, []);
   const tomorrow = useMemo(() => new Date(today.getTime() + 86400000), [today]);
 
-  const { data: todaySchedules, isLoading: loadingSchedules } = useSchedules({
+  const { data: todaySchedules, isLoading: loadingSchedules, isFetching: fetchingSchedules, refetch: refetchSchedules } = useSchedules({
     dateFrom: today.toISOString(),
     dateTo: tomorrow.toISOString(),
   });
 
-  const { data: allAuths, isLoading: loadingAuths } = useAuthorizations();
+  const { data: allAuths, isLoading: loadingAuths, isFetching: fetchingAuths, refetch: refetchAuths } = useAuthorizations();
 
   // Stats
   const stats = useMemo(() => {
@@ -43,6 +46,8 @@ export default function AdminDashboard() {
   }, [todaySchedules, allAuths, today]);
 
   const isLoading = loadingSchedules || loadingAuths;
+  const isFetching = fetchingSchedules || fetchingAuths;
+  function refetch() { refetchSchedules(); refetchAuths(); }
 
   // Expiring authorizations (within 30 days)
   const expiringAuths = useMemo(() => {
@@ -61,8 +66,21 @@ export default function AdminDashboard() {
     [todaySchedules]
   );
 
+  if (isLoading) return <SkeletonDashboard />;
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          refreshing={isFetching && !isLoading}
+          onRefresh={refetch}
+          tintColor="#2563eb"
+          colors={['#2563eb']}
+        />
+      }
+    >
       {/* Header */}
       <View style={styles.pageHeader}>
         <View>
@@ -74,11 +92,8 @@ export default function AdminDashboard() {
         </TouchableOpacity>
       </View>
 
-      {isLoading ? (
-        <ActivityIndicator style={styles.loader} color="#2563eb" />
-      ) : (
-        <>
-          {/* Stat cards */}
+      {/* Stat cards */}
+      <>
           <View style={styles.statsGrid}>
             <StatCard icon="calendar-outline" label="Today's Visits" value={stats.todayCount} color="#2563eb" />
             <StatCard icon="radio-button-on-outline" label="In Progress" value={stats.inProgress} color="#d97706" />
@@ -99,7 +114,7 @@ export default function AdminDashboard() {
                 <TouchableOpacity
                   key={s.id}
                   style={styles.liveCard}
-                  onPress={() => router.push(`/(admin)/schedule/${s.id}`)}
+                  onPress={() => router.push({ pathname: '/(admin)/schedule/[id]', params: { id: s.id } })}
                 >
                   <View style={styles.liveDot} />
                   <View style={styles.liveBody}>
@@ -120,7 +135,7 @@ export default function AdminDashboard() {
                 <TouchableOpacity
                   key={s.id}
                   style={styles.scheduleRow}
-                  onPress={() => router.push(`/(admin)/schedule/${s.id}`)}
+                  onPress={() => router.push({ pathname: '/(admin)/schedule/[id]', params: { id: s.id } })}
                 >
                   <Text style={styles.scheduleTime}>{fmtTime(s.start_time)}</Text>
                   <View style={styles.scheduleBody}>
@@ -162,13 +177,13 @@ export default function AdminDashboard() {
 
           {/* Empty state */}
           {(todaySchedules?.length ?? 0) === 0 && expiringAuths.length === 0 && (
-            <View style={styles.empty}>
-              <Ionicons name="sunny-outline" size={48} color="#d1d5db" />
-              <Text style={styles.emptyText}>No visits scheduled today</Text>
-            </View>
+            <EmptyState
+              icon="sunny-outline"
+              title="No visits today"
+              description="Nothing scheduled for today. Add a schedule or check back later."
+            />
           )}
-        </>
-      )}
+      </>
     </ScrollView>
   );
 }

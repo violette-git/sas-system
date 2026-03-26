@@ -1,18 +1,21 @@
 import { useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, TextInput,
-  Modal, StyleSheet, ActivityIndicator, Alert,
+  Modal, StyleSheet, ActivityIndicator, Alert, RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useEmployees, useInviteEmployee, useToggleEmployee } from '@/features/employees/hooks/useEmployees';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { SkeletonList } from '@/components/ui/SkeletonList';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import type { UserProfile, UserRole } from '@/lib/supabase';
 
 type InviteRole = Extract<UserRole, 'admin' | 'employee'>;
 
 export default function AdminEmployees() {
   const { profile: me } = useAuthStore();
-  const { data: employees, isLoading } = useEmployees();
+  const { data: employees, isLoading, isFetching, refetch } = useEmployees();
   const inviteEmployee = useInviteEmployee();
   const toggleEmployee = useToggleEmployee();
 
@@ -97,19 +100,28 @@ export default function AdminEmployees() {
       </View>
 
       {isLoading
-        ? <ActivityIndicator style={styles.loader} color="#2563eb" />
+        ? <SkeletonList count={5} />
         : (
           <FlatList
             data={employees}
             keyExtractor={(e) => e.id}
             renderItem={renderEmployee}
             contentContainerStyle={styles.list}
+            refreshControl={
+              <RefreshControl
+                refreshing={isFetching && !isLoading}
+                onRefresh={refetch}
+                tintColor="#2563eb"
+                colors={['#2563eb']}
+              />
+            }
             ListEmptyComponent={
-              <View style={styles.empty}>
-                <Ionicons name="people-outline" size={48} color="#d1d5db" />
-                <Text style={styles.emptyText}>No employees yet</Text>
-                <Text style={styles.emptyHint}>Tap "Invite" to add team members</Text>
-              </View>
+              <EmptyState
+                icon="people-outline"
+                title="No employees yet"
+                description="Invite team members to get started."
+                action={{ label: 'Invite Employee', onPress: () => { resetModal(); setModalVisible(true); } }}
+              />
             }
           />
         )

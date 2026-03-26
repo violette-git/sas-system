@@ -4,9 +4,11 @@ import {
   StyleSheet, ActivityIndicator, KeyboardAvoidingView,
   Platform, ScrollView, StatusBar,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSignIn } from '@/features/auth/hooks/useSignIn';
 
 export default function LoginScreen() {
+  const router = useRouter();
   const [accessCode, setAccessCode] = useState('');
   const [email, setEmail]           = useState('');
   const [password, setPassword]     = useState('');
@@ -102,6 +104,14 @@ export default function LoginScreen() {
             }
           </TouchableOpacity>
 
+          {/* Forgot password */}
+          <TouchableOpacity
+            style={styles.forgotWrap}
+            onPress={() => router.push('/(auth)/forgot-password')}
+          >
+            <Text style={styles.forgotText}>Forgot your password?</Text>
+          </TouchableOpacity>
+
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -146,4 +156,6 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText:     { color: '#fff', fontSize: 16, fontWeight: '600' },
+  forgotWrap:     { alignItems: 'center', marginTop: 4 },
+  forgotText:     { fontSize: 14, color: '#9CA3AF' },
 });

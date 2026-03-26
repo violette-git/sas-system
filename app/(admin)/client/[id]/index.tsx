@@ -69,7 +69,7 @@ export default function ClientDetail() {
       <View style={styles.actionsCard}>
         <TouchableOpacity
           style={styles.actionRow}
-          onPress={() => router.push(`/(admin)/client/${id}/authorizations`)}
+          onPress={() => router.push({ pathname: '/(admin)/client/[id]/authorizations', params: { id } })}
         >
           <View style={styles.actionIcon}>
             <Ionicons name="document-text-outline" size={20} color="#2563eb" />

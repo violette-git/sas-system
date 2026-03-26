@@ -84,7 +84,7 @@ function NoteForm({
   function handleSaveDraft() {
     if (existingNote) {
       updateNote.mutate(
-        { id: existingNote.id, schedule_id: scheduleId, ...buildPayload(true) },
+        { id: existingNote.id, ...buildPayload(true) },
         { onSuccess: onDone }
       );
     } else {
@@ -99,7 +99,7 @@ function NoteForm({
     }
     if (existingNote) {
       updateNote.mutate(
-        { id: existingNote.id, schedule_id: scheduleId, ...buildPayload(false) },
+        { id: existingNote.id, ...buildPayload(false) },
         {
           onSuccess: () => {
             submitNote.mutate({ id: existingNote.id, schedule_id: scheduleId }, { onSuccess: onDone });

@@ -5,6 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useSession } from '@/features/auth/hooks/useSession';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 function AuthGate() {
   const router   = useRouter();
@@ -25,9 +26,23 @@ function AuthGate() {
       return;
     }
 
+    // Owner with no company outside auth group → onboarding
+    if (session && profile && profile.role === 'owner' && !profile.company_id && !inAuthGroup) {
+      router.replace('/(auth)/onboarding');
+      return;
+    }
+
     if (session && profile && inAuthGroup) {
       // Keep new users on set-password until they complete account setup
       if (segments[1] === 'set-password') return;
+      // Keep owners on onboarding until they finish setup
+      if (segments[1] === 'onboarding') return;
+
+      // New owner with no company → start onboarding
+      if (profile.role === 'owner' && !profile.company_id) {
+        router.replace('/(auth)/onboarding');
+        return;
+      }
 
       switch (profile.role) {
         case 'owner':    router.replace('/(owner)');    break;
@@ -43,10 +58,12 @@ function AuthGate() {
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <View style={{ flex: 1, backgroundColor: '#0D0F12' }}>
-        <StatusBar barStyle="light-content" backgroundColor="#0D0F12" />
-        <AuthGate />
-      </View>
+      <ErrorBoundary>
+        <View style={{ flex: 1, backgroundColor: '#0D0F12' }}>
+          <StatusBar barStyle="light-content" backgroundColor="#0D0F12" />
+          <AuthGate />
+        </View>
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 }
