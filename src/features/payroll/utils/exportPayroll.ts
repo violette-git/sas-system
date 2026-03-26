@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Alert } from 'react-native';
 import type { TimesheetRow } from '../hooks/useTimesheets';
 import type { PayRate } from '../hooks/usePayRates';
