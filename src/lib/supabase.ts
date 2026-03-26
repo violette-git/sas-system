@@ -64,6 +64,26 @@ export interface Company {
   trade_name: string | null;
   access_code: string;
   is_active: boolean;
+  // Phase 6 — White-label branding
+  primary_color: string | null;
+  secondary_color: string | null;
+  logo_url: string | null;
+  company_name_display: string | null;
+}
+
+export interface AuditLog {
+  id: string;
+  company_id: string | null;
+  user_id: string | null;
+  action: string;
+  table_name: string;
+  record_id: string | null;
+  old_data: Record<string, unknown> | null;
+  new_data: Record<string, unknown> | null;
+  ip_address: string | null;
+  created_at: string;
+  // joined
+  users?: { full_name: string; email: string } | null;
 }
 
 export interface ServiceType {

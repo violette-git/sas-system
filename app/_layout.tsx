@@ -6,6 +6,9 @@ import { queryClient } from '@/lib/queryClient';
 import { useSession } from '@/features/auth/hooks/useSession';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { ThemeProvider } from '@/providers/ThemeProvider';
+import { OfflineProvider } from '@/providers/OfflineProvider';
+import { OfflineBanner } from '@/features/offline/components/OfflineBanner';
 
 function AuthGate() {
   const router   = useRouter();
@@ -59,10 +62,15 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
-        <View style={{ flex: 1, backgroundColor: '#0D0F12' }}>
-          <StatusBar barStyle="light-content" backgroundColor="#0D0F12" />
-          <AuthGate />
-        </View>
+        <ThemeProvider>
+          <OfflineProvider>
+            <View style={{ flex: 1, backgroundColor: '#0D0F12' }}>
+              <StatusBar barStyle="light-content" backgroundColor="#0D0F12" />
+              <AuthGate />
+              <OfflineBanner />
+            </View>
+          </OfflineProvider>
+        </ThemeProvider>
       </ErrorBoundary>
     </QueryClientProvider>
   );

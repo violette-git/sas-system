@@ -27,6 +27,7 @@ export default function OwnerLayout() {
         }}
       />
       <Tabs.Screen name="notifications" options={{ href: null, title: 'Notifications' }} />
+      <Tabs.Screen name="branding"      options={{ href: null, title: 'Brand Settings' }} />
     </Tabs>
   );
 }
