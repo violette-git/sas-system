@@ -68,6 +68,22 @@ const CURRENT_FEATURES = {
     { name: "useNotifications hook (React Query + Supabase realtime)", done: true },
     { name: "9 new database tables with RLS policies", done: true },
   ]},
+  caseNotes: { label: "Phase 3 — Case Notes & Documentation", color: COLORS.blue, items: [
+    { name: "RichTextEditor component (markdown input, formatting toolbar)", done: true },
+    { name: "PhotoAttachments component (expo-image-picker, multi-photo upload)", done: true },
+    { name: "TemplateFieldRenderer (dynamic fields: text, checkbox, select, date)", done: true },
+    { name: "CaseNoteEditorScreen (employee: write note with template + photos)", done: true },
+    { name: "CaseNoteReviewScreen (admin: approve/reject/request-revision)", done: true },
+    { name: "useCaseNotes hook (React Query CRUD + status workflow)", done: true },
+    { name: "TemplateListScreen & TemplateEditorScreen (admin configures templates)", done: true },
+    { name: "useTemplates hook (CRUD for note templates with fields)", done: true },
+    { name: "DocumentUpload component (expo-document-picker, PDF/image upload)", done: true },
+    { name: "DocumentsScreen (admin: client document library with upload)", done: true },
+    { name: "useDocuments hook (React Query CRUD for document records)", done: true },
+    { name: "SignaturePad component (react-native-signature-canvas)", done: true },
+    { name: "SignatureScreen (employee: capture signature, save to document)", done: true },
+    { name: "Phase 3 DB migration (case_notes, note_templates, template_fields, document_signatures tables)", done: true },
+  ]},
 };
 
 const PLANNED_FEATURES = [
@@ -86,12 +102,12 @@ const PLANNED_FEATURES = [
     { name: "\u2705 Availability Management", desc: "Weekly grid per employee, time-off requests, admin view, new employee tab", priority: "P1" },
     { name: "\u2705 Bulk Schedule", desc: "3-step modal: select staff/clients, template or manual pattern, preview + bulk create", priority: "P2" },
   ]},
-  { phase: "Phase 3 — Case Notes & Documentation", color: COLORS.blue, features: [
-    { name: "Rich Case Notes", desc: "Markdown/rich text editor, attach photos, structured templates per service type", priority: "P0" },
-    { name: "Case Note Templates", desc: "Admin-configurable templates with required fields, dropdowns, checkboxes", priority: "P0" },
-    { name: "Document Management", desc: "Upload/store PDFs, images, signed forms per client with version history", priority: "P1" },
-    { name: "E-Signatures", desc: "In-app signature capture for consent forms, service agreements", priority: "P2" },
-    { name: "Case Note Review/Approval", desc: "Admin review queue, approve/reject/request-revision workflow", priority: "P1" },
+  { phase: "Phase 3 — Case Notes & Documentation \u2705 COMPLETE", color: COLORS.blue, features: [
+    { name: "\u2705 Rich Case Notes", desc: "Markdown/rich text editor, attach photos, structured templates per service type", priority: "P0" },
+    { name: "\u2705 Case Note Templates", desc: "Admin-configurable templates with required fields, dropdowns, checkboxes", priority: "P0" },
+    { name: "\u2705 Document Management", desc: "Upload/store PDFs, images, signed forms per client with version history", priority: "P1" },
+    { name: "\u2705 E-Signatures", desc: "In-app signature capture for consent forms, service agreements", priority: "P2" },
+    { name: "\u2705 Case Note Review/Approval", desc: "Admin review queue, approve/reject/request-revision workflow", priority: "P1" },
   ]},
   { phase: "Phase 4 — Payroll & Billing", color: COLORS.amber, features: [
     { name: "Timesheet Summary", desc: "Weekly/biweekly timesheet view grouped by employee, auto-calculated from time entries", priority: "P0" },

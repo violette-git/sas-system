@@ -4,6 +4,7 @@ import {
   Modal, TextInput, Alert, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import {
@@ -13,10 +14,11 @@ import { ProfileScreen } from '@/features/profile/screens/ProfileScreen';
 import type { ServiceType } from '@/lib/supabase';
 
 type ModalMode = 'create' | 'edit';
-type Tab = 'profile' | 'services';
+type Tab = 'profile' | 'services' | 'tools';
 
 export default function AdminSettings() {
   const { profile, company, clear } = useAuthStore();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('profile');
   const { data: serviceTypes = [], isLoading } = useServiceTypes();
   const createMutation  = useCreateServiceType();
@@ -111,6 +113,14 @@ export default function AdminSettings() {
             Service Types
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabBtn, activeTab === 'tools' && styles.tabBtnActive]}
+          onPress={() => setActiveTab('tools')}
+        >
+          <Text style={[styles.tabBtnText, activeTab === 'tools' && styles.tabBtnTextActive]}>
+            Tools
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Sign out row */}
@@ -123,6 +133,42 @@ export default function AdminSettings() {
           >
             <Ionicons name="log-out-outline" size={18} color="#fff" />
             <Text style={styles.signOutText}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Tools section — Review Queue + Templates */}
+      {activeTab === 'tools' && (
+        <View style={styles.toolsSection}>
+          <Text style={styles.toolsSectionTitle}>Case Notes & Documents</Text>
+          <TouchableOpacity
+            style={styles.toolRow}
+            onPress={() => router.push('/(admin)/review')}
+          >
+            <View style={styles.toolIcon}>
+              <Ionicons name="checkmark-done-outline" size={20} color="#2563eb" />
+            </View>
+            <View style={styles.toolBody}>
+              <Text style={styles.toolTitle}>Review Queue</Text>
+              <Text style={styles.toolSubtitle}>Approve, reject, or request revisions on submitted case notes</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+          </TouchableOpacity>
+
+          <View style={styles.toolDivider} />
+
+          <TouchableOpacity
+            style={styles.toolRow}
+            onPress={() => router.push('/(admin)/templates')}
+          >
+            <View style={styles.toolIcon}>
+              <Ionicons name="document-text-outline" size={20} color="#2563eb" />
+            </View>
+            <View style={styles.toolBody}>
+              <Text style={styles.toolTitle}>Templates</Text>
+              <Text style={styles.toolSubtitle}>Create structured note templates for employees</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
           </TouchableOpacity>
         </View>
       )}
@@ -293,4 +339,12 @@ const styles = StyleSheet.create({
   inputError:       { borderColor: '#ef4444' },
   textArea:         { height: 80, textAlignVertical: 'top' },
   errorText:        { fontSize: 12, color: '#ef4444', marginTop: 2 },
+  toolsSection:     { padding: 16, gap: 0 },
+  toolsSectionTitle:{ fontSize: 13, fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 },
+  toolRow:          { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 16, gap: 12, borderRadius: 0 },
+  toolDivider:      { height: 1, backgroundColor: '#f3f4f6', marginHorizontal: 16 },
+  toolIcon:         { width: 36, height: 36, borderRadius: 8, backgroundColor: '#dbeafe', justifyContent: 'center', alignItems: 'center' },
+  toolBody:         { flex: 1 },
+  toolTitle:        { fontSize: 15, fontWeight: '600', color: '#111827' },
+  toolSubtitle:     { fontSize: 12, color: '#6b7280', marginTop: 1 },
 });

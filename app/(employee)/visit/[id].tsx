@@ -4,6 +4,7 @@ import {
   TextInput, ActivityIndicator, Switch, Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import type { VisitNoteStatus } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { useSchedule } from '@/features/schedules/hooks/useSchedules';
 import { useTimeEntriesForSchedule } from '@/features/time-entries/hooks/useTimeEntries';
@@ -178,7 +179,7 @@ function NoteForm({
         />
       </View>
 
-      <View style={styles.noteActions}>
+      <View style={styles.noteActionsRow}>
         <TouchableOpacity
           style={[styles.draftBtn, isBusy && styles.btnDisabled]}
           onPress={handleSaveDraft}
@@ -309,12 +310,21 @@ export default function EmployeeVisitDetail() {
             onDone={() => setShowForm(false)}
           />
         ) : (
-          <TouchableOpacity style={styles.addNoteBtn} onPress={() => setShowForm(true)}>
-            <Ionicons name="create-outline" size={18} color="#2563eb" />
-            <Text style={styles.addNoteBtnText}>
-              {submittedNotes.length > 0 ? 'Add Another Note' : 'Add Visit Note'}
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.noteActions}>
+            <TouchableOpacity style={styles.addNoteBtn} onPress={() => setShowForm(true)}>
+              <Ionicons name="create-outline" size={18} color="#2563eb" />
+              <Text style={styles.addNoteBtnText}>
+                {submittedNotes.length > 0 ? 'Add Another Note' : 'Add Visit Note'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.richEditorBtn}
+              onPress={() => router.push({ pathname: '/(employee)/case-note/[scheduleId]', params: { scheduleId: id } })}
+            >
+              <Ionicons name="document-text-outline" size={18} color="#7c3aed" />
+              <Text style={styles.richEditorBtnText}>Rich Editor + Template</Text>
+            </TouchableOpacity>
+          </View>
         )
       )}
 
@@ -359,8 +369,11 @@ const styles = StyleSheet.create({
   noteFieldValue:{ fontSize: 13, color: '#374151' },
   supervisorTag: { fontSize: 12, color: '#7c3aed', fontWeight: '600' },
 
+  noteActions:    { gap: 8 },
   addNoteBtn:     { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: 12, padding: 16, borderWidth: 1.5, borderColor: '#2563eb', justifyContent: 'center' },
   addNoteBtnText: { fontSize: 15, fontWeight: '600', color: '#2563eb' },
+  richEditorBtn:  { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#7c3aed', justifyContent: 'center' },
+  richEditorBtnText: { fontSize: 14, fontWeight: '600', color: '#7c3aed' },
 
   noteForm:     { backgroundColor: '#fff', borderRadius: 12, padding: 16, gap: 14, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 3, elevation: 1 },
   sectionLabel: { fontSize: 12, fontWeight: '700', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5 },
@@ -383,7 +396,7 @@ const styles = StyleSheet.create({
   toggleRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   toggleHint:  { fontSize: 12, color: '#9ca3af', marginTop: 1 },
 
-  noteActions:  { flexDirection: 'row', gap: 10 },
+  noteActionsRow:  { flexDirection: 'row', gap: 10 },
   draftBtn:     { flex: 1, borderWidth: 1, borderColor: '#d1d5db', borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
   draftBtnText: { fontSize: 14, fontWeight: '600', color: '#374151' },
   submitBtn:    { flex: 2, backgroundColor: '#2563eb', borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
