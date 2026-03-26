@@ -34,6 +34,13 @@ export default function AdminLayout() {
         }}
       />
       <Tabs.Screen
+        name="timesheets"
+        options={{
+          title: 'Payroll',
+          tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="clients"
         options={{
           title: 'Clients',
@@ -47,6 +54,15 @@ export default function AdminLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="reports"
+        options={{
+          title: 'Reports',
+          tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart-outline" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen name="invoices"                        options={{ href: null, title: 'Invoices' }} />
+      <Tabs.Screen name="pay-rates"                      options={{ href: null, title: 'Pay Rates' }} />
       <Tabs.Screen name="notifications"                  options={{ href: null, title: 'Notifications' }} />
       <Tabs.Screen name="audit-log"                      options={{ href: null, title: 'Audit Log' }} />
       <Tabs.Screen name="permissions"                    options={{ href: null, title: 'Permissions' }} />
@@ -58,6 +74,9 @@ export default function AdminLayout() {
       <Tabs.Screen name="review"                        options={{ href: null, title: 'Review Queue' }} />
       <Tabs.Screen name="templates"                     options={{ href: null, title: 'Templates' }} />
       <Tabs.Screen name="template/[id]"                 options={{ href: null, title: 'Template Editor' }} />
+      <Tabs.Screen name="employee-performance"           options={{ href: null, title: 'Employee Performance' }} />
+      <Tabs.Screen name="client-reports"                 options={{ href: null, title: 'Client Reports' }} />
+      <Tabs.Screen name="cross-company"                  options={{ href: null, title: 'Company Comparison' }} />
     </Tabs>
   );
 }
