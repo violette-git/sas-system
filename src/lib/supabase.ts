@@ -56,6 +56,8 @@ export interface UserProfile {
   is_active: boolean;
   avatar_url: string | null;
   phone: string | null;
+  /** Phase 6 — Granular permission overrides (JSONB) */
+  permissions: Record<string, boolean>;
 }
 
 export interface Company {
@@ -69,6 +71,9 @@ export interface Company {
   secondary_color: string | null;
   logo_url: string | null;
   company_name_display: string | null;
+  // Phase 6 — Geofencing + i18n
+  geofence_radius_meters: number;
+  default_language: string;
 }
 
 export interface AuditLog {

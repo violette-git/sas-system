@@ -9,6 +9,8 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { OfflineProvider } from '@/providers/OfflineProvider';
 import { OfflineBanner } from '@/features/offline/components/OfflineBanner';
+import { I18nProvider } from '@/providers/I18nProvider';
+import '@/i18n'; // initialise i18next
 
 function AuthGate() {
   const router   = useRouter();
@@ -62,6 +64,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
+        <I18nProvider>
         <ThemeProvider>
           <OfflineProvider>
             <View style={{ flex: 1, backgroundColor: '#0D0F12' }}>
@@ -71,6 +74,7 @@ export default function RootLayout() {
             </View>
           </OfflineProvider>
         </ThemeProvider>
+        </I18nProvider>
       </ErrorBoundary>
     </QueryClientProvider>
   );

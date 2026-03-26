@@ -49,6 +49,7 @@ export default function AdminLayout() {
       />
       <Tabs.Screen name="notifications"                  options={{ href: null, title: 'Notifications' }} />
       <Tabs.Screen name="audit-log"                      options={{ href: null, title: 'Audit Log' }} />
+      <Tabs.Screen name="permissions"                    options={{ href: null, title: 'Permissions' }} />
       <Tabs.Screen name="client/[id]/index"             options={{ href: null, title: 'Client Detail' }} />
       <Tabs.Screen name="client/[id]/authorizations"    options={{ href: null, title: 'Authorizations' }} />
       <Tabs.Screen name="client/[id]/documents"         options={{ href: null, title: 'Documents' }} />

@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useActiveTimeEntry, useClockIn, useClockOut } from '@/features/time-entries/hooks/useTimeEntries';
 import { useMySchedules } from '@/features/schedules/hooks/useSchedules';
 import type { ScheduleWithRelations } from '@/features/schedules/hooks/useSchedules';
+import { useGeofence, type GeofenceResult } from '@/features/geofencing/hooks/useGeofence';
+import { GeofenceWarning } from '@/features/geofencing/components/GeofenceWarning';
 
 function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -29,6 +31,7 @@ function fmtDay(iso: string): string {
 
 function ClockedInCard({ entry, schedules }: { entry: any; schedules: ScheduleWithRelations[] }) {
   const clockOut = useClockOut();
+  const { getCurrentLocation } = useGeofence();
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
@@ -43,10 +46,13 @@ function ClockedInCard({ entry, schedules }: { entry: any; schedules: ScheduleWi
   const units = Math.floor(elapsed / 900);
   const hours = (elapsed / 3600).toFixed(2);
 
-  function handleClockOut() {
+  async function handleClockOut() {
+    const coords = await getCurrentLocation();
     clockOut.mutate({
       id: entry.id,
       schedule_id: entry.schedule_id,
+      lat: coords?.lat ?? null,
+      lon: coords?.lon ?? null,
     });
   }
 
@@ -109,15 +115,17 @@ function ClockedInCard({ entry, schedules }: { entry: any; schedules: ScheduleWi
 
 function IdleCard({ schedules }: { schedules: ScheduleWithRelations[] }) {
   const clockIn = useClockIn();
-  const [selected, setSelected] = useState<string | null>(null);
+  const { checkGeofence, isChecking } = useGeofence();
+  const [selected, setSelected]                         = useState<string | null>(null);
+  const [geofenceResult, setGeofenceResult]             = useState<GeofenceResult | null>(null);
+  const [geofenceWarningVisible, setGeofenceWarningVisible] = useState(false);
+  const [pendingCoords, setPendingCoords]               = useState<{ lat: number | null; lon: number | null } | null>(null);
 
-  const now = new Date();
   const upcoming = schedules.filter(s => s.status === 'scheduled' || s.status === 'in_progress');
 
   // Auto-select first in-progress or scheduled visit today
   const autoSelect = upcoming.find(s => {
     const start = new Date(s.start_time);
-    const end   = new Date(s.end_time);
     const today = new Date(); today.setHours(0,0,0,0);
     return start >= today && start <= new Date(today.getTime() + 86400000);
   });
@@ -125,63 +133,112 @@ function IdleCard({ schedules }: { schedules: ScheduleWithRelations[] }) {
   const scheduleId = selected ?? autoSelect?.id ?? null;
   const targetSchedule = upcoming.find(s => s.id === scheduleId);
 
-  function handleClockIn() {
+  // The client object joined on the schedule (may include lat/lon after migration)
+  const clientWithCoords = targetSchedule?.clients as
+    (ScheduleWithRelations['clients'] & { latitude?: number | null; longitude?: number | null }) | null | undefined;
+
+  async function handleClockIn() {
     if (!scheduleId) {
       Alert.alert('Select a Visit', 'Please select a visit to clock into.');
       return;
     }
-    clockIn.mutate({ schedule_id: scheduleId });
+
+    // Run geofence check
+    const result = await checkGeofence(
+      clientWithCoords?.latitude,
+      clientWithCoords?.longitude,
+    );
+
+    const coords = { lat: result.coords?.lat ?? null, lon: result.coords?.lon ?? null };
+    setPendingCoords(coords);
+
+    if (result.status === 'outside') {
+      setGeofenceResult(result);
+      setGeofenceWarningVisible(true);
+      return;
+    }
+
+    // All clear (within, no_client_location, permission_denied, unavailable)
+    if (result.status === 'permission_denied') {
+      Alert.alert(
+        'Location Permission',
+        'Location permission was denied. Clock-in will proceed without GPS.',
+        [{ text: 'OK', onPress: () => doClockIn(scheduleId, coords) }],
+      );
+      return;
+    }
+
+    doClockIn(scheduleId, coords);
+  }
+
+  function doClockIn(sid: string, coords: { lat: number | null; lon: number | null }) {
+    clockIn.mutate({ schedule_id: sid, lat: coords.lat, lon: coords.lon });
   }
 
   return (
-    <View style={styles.idleCard}>
-      <Ionicons name="time-outline" size={48} color="#93c5fd" />
-      <Text style={styles.idleTitle}>Ready to Clock In?</Text>
-      <Text style={styles.idleHint}>Select a visit below then tap Clock In</Text>
+    <>
+      <View style={styles.idleCard}>
+        <Ionicons name="time-outline" size={48} color="#93c5fd" />
+        <Text style={styles.idleTitle}>Ready to Clock In?</Text>
+        <Text style={styles.idleHint}>Select a visit below then tap Clock In</Text>
 
-      {upcoming.length === 0 ? (
-        <Text style={styles.noVisits}>No upcoming visits this week</Text>
-      ) : (
-        <View style={styles.visitPicker}>
-          {upcoming.map(s => (
-            <TouchableOpacity
-              key={s.id}
-              style={[styles.visitOption, scheduleId === s.id && styles.visitOptionSelected]}
-              onPress={() => setSelected(s.id)}
-            >
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.visitOptionClient, scheduleId === s.id && styles.visitOptionClientSelected]}>
-                  {s.clients?.name ?? '—'}
-                </Text>
-                <Text style={styles.visitOptionMeta}>
-                  {fmtDay(s.start_time)} · {fmtTime(s.start_time)} – {fmtTime(s.end_time)}
-                </Text>
-                {s.service_types && (
-                  <Text style={styles.visitOptionService}>{s.service_types.name}</Text>
-                )}
-              </View>
-              {scheduleId === s.id && <Ionicons name="checkmark-circle" size={20} color="#2563eb" />}
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+        {upcoming.length === 0 ? (
+          <Text style={styles.noVisits}>No upcoming visits this week</Text>
+        ) : (
+          <View style={styles.visitPicker}>
+            {upcoming.map(s => (
+              <TouchableOpacity
+                key={s.id}
+                style={[styles.visitOption, scheduleId === s.id && styles.visitOptionSelected]}
+                onPress={() => setSelected(s.id)}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.visitOptionClient, scheduleId === s.id && styles.visitOptionClientSelected]}>
+                    {s.clients?.name ?? '—'}
+                  </Text>
+                  <Text style={styles.visitOptionMeta}>
+                    {fmtDay(s.start_time)} · {fmtTime(s.start_time)} – {fmtTime(s.end_time)}
+                  </Text>
+                  {s.service_types && (
+                    <Text style={styles.visitOptionService}>{s.service_types.name}</Text>
+                  )}
+                </View>
+                {scheduleId === s.id && <Ionicons name="checkmark-circle" size={20} color="#2563eb" />}
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
-      <TouchableOpacity
-        style={[styles.clockBtn, styles.clockInBtn, (!scheduleId || clockIn.isPending) && styles.btnDisabled]}
-        onPress={handleClockIn}
-        disabled={!scheduleId || clockIn.isPending}
-      >
-        {clockIn.isPending
-          ? <ActivityIndicator color="#fff" />
-          : (
-            <>
-              <Ionicons name="play-circle-outline" size={22} color="#fff" />
-              <Text style={styles.clockBtnText}>Clock In</Text>
-            </>
-          )
-        }
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          style={[styles.clockBtn, styles.clockInBtn, (!scheduleId || clockIn.isPending || isChecking) && styles.btnDisabled]}
+          onPress={handleClockIn}
+          disabled={!scheduleId || clockIn.isPending || isChecking}
+        >
+          {(clockIn.isPending || isChecking)
+            ? <ActivityIndicator color="#fff" />
+            : (
+              <>
+                <Ionicons name="play-circle-outline" size={22} color="#fff" />
+                <Text style={styles.clockBtnText}>Clock In</Text>
+              </>
+            )
+          }
+        </TouchableOpacity>
+      </View>
+
+      <GeofenceWarning
+        visible={geofenceWarningVisible}
+        result={geofenceResult}
+        onProceed={() => {
+          setGeofenceWarningVisible(false);
+          if (scheduleId && pendingCoords) doClockIn(scheduleId, pendingCoords);
+        }}
+        onCancel={() => {
+          setGeofenceWarningVisible(false);
+          setPendingCoords(null);
+        }}
+      />
+    </>
   );
 }
 
