@@ -9,7 +9,7 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 function AuthGate() {
   const router   = useRouter();
-  const segments = useSegments();
+  const segments = useSegments() as string[];
   const { session, profile, isLoading } = useAuthStore();
 
   useSession(); // bootstraps session on launch

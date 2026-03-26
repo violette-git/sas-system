@@ -120,6 +120,8 @@ export interface TimeEntry {
   clocked_out_lon: number | null;
 }
 
+export type VisitNoteStatus = 'draft' | 'submitted' | 'approved' | 'revision_requested' | 'rejected';
+
 export interface VisitNote {
   id: string;
   schedule_id: string;
@@ -131,4 +133,59 @@ export interface VisitNote {
   next_steps: string | null;
   supervisor_notified: boolean;
   is_draft: boolean;
+  // Phase 3 review workflow fields (optional — backfilled on existing rows)
+  status?: VisitNoteStatus;
+  review_comment?: string | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  template_id?: string | null;
+  template_data?: Record<string, unknown> | null;
+  photo_urls?: string[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type TemplateFieldType = 'text' | 'textarea' | 'dropdown' | 'checkbox' | 'date';
+
+export interface TemplateField {
+  id: string;
+  type: TemplateFieldType;
+  label: string;
+  required: boolean;
+  options?: string[];       // for dropdown fields
+  placeholder?: string;
+}
+
+export interface Template {
+  id: string;
+  company_id: string;
+  name: string;
+  description: string | null;
+  service_type_id: string | null;
+  fields: TemplateField[];
+  is_active: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Document {
+  id: string;
+  company_id: string;
+  client_id: string | null;
+  schedule_id: string | null;
+  uploaded_by: string;
+  file_name: string;
+  file_url: string;
+  file_type: string | null;
+  file_size_bytes: number | null;
+  category: string | null;
+  description: string | null;
+  version: number;
+  parent_document_id: string | null;
+  signature_url: string | null;
+  signature_signed_at: string | null;
+  signature_requested_from: string | null;
+  created_at: string;
+  updated_at: string;
 }

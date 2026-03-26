@@ -47,10 +47,15 @@ export default function AdminLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
         }}
       />
-      <Tabs.Screen name="notifications"              options={{ href: null, title: 'Notifications' }} />
-      <Tabs.Screen name="client/[id]/index"         options={{ href: null, title: 'Client Detail' }} />
-      <Tabs.Screen name="client/[id]/authorizations" options={{ href: null, title: 'Authorizations' }} />
-      <Tabs.Screen name="schedule/[id]"              options={{ href: null, title: 'Schedule Detail' }} />
+      <Tabs.Screen name="notifications"                  options={{ href: null, title: 'Notifications' }} />
+      <Tabs.Screen name="client/[id]/index"             options={{ href: null, title: 'Client Detail' }} />
+      <Tabs.Screen name="client/[id]/authorizations"    options={{ href: null, title: 'Authorizations' }} />
+      <Tabs.Screen name="client/[id]/documents"         options={{ href: null, title: 'Documents' }} />
+      <Tabs.Screen name="client/[id]/signature"         options={{ href: null, title: 'E-Signature' }} />
+      <Tabs.Screen name="schedule/[id]"                 options={{ href: null, title: 'Schedule Detail' }} />
+      <Tabs.Screen name="review"                        options={{ href: null, title: 'Review Queue' }} />
+      <Tabs.Screen name="templates"                     options={{ href: null, title: 'Templates' }} />
+      <Tabs.Screen name="template/[id]"                 options={{ href: null, title: 'Template Editor' }} />
     </Tabs>
   );
 }

@@ -80,6 +80,22 @@ export default function ClientDetail() {
           </View>
           <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
         </TouchableOpacity>
+
+        <View style={styles.actionDivider} />
+
+        <TouchableOpacity
+          style={styles.actionRow}
+          onPress={() => router.push({ pathname: '/(admin)/client/[id]/documents', params: { id } })}
+        >
+          <View style={styles.actionIcon}>
+            <Ionicons name="folder-outline" size={20} color="#2563eb" />
+          </View>
+          <View style={styles.actionBody}>
+            <Text style={styles.actionTitle}>Documents</Text>
+            <Text style={styles.actionSubtitle}>Upload and manage client files</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -113,6 +129,7 @@ const styles = StyleSheet.create({
   notesText:        { fontSize: 14, color: '#374151', lineHeight: 20 },
   actionsCard:      { backgroundColor: '#fff', borderRadius: 12, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 3, elevation: 1 },
   actionRow:        { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12 },
+  actionDivider:    { height: 1, backgroundColor: '#f3f4f6', marginHorizontal: 16 },
   actionIcon:       { width: 36, height: 36, borderRadius: 8, backgroundColor: '#dbeafe', justifyContent: 'center', alignItems: 'center' },
   actionBody:       { flex: 1 },
   actionTitle:      { fontSize: 15, fontWeight: '600', color: '#111827' },

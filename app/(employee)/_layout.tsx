@@ -38,6 +38,14 @@ export default function EmployeeLayout() {
         name="visit/[id]"
         options={{ href: null, title: 'Visit Detail', headerShown: true }}
       />
+      <Tabs.Screen
+        name="case-note/[scheduleId]"
+        options={{ href: null, title: 'Case Note', headerShown: true }}
+      />
+      <Tabs.Screen
+        name="signature/[documentId]"
+        options={{ href: null, title: 'Sign Document', headerShown: true }}
+      />
     </Tabs>
   );
 }
