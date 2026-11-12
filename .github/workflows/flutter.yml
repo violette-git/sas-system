@@ -1,0 +1,149 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: flutter-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Same Flutter for every job. Bump deliberately.
+  FLUTTER_CHANNEL: stable
+  DART_DEFINES: >-
+    --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+    --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+    --dart-define=APP_URL=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+
+jobs:
+  # Generates android/ ios/ web/ once (if missing) and commits them back so
+  # platform settings (permissions, deep links, app name) live in git.
+  scaffold:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.commit.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+      - name: Create missing platform folders
+        run: |
+          if [ ! -d android ] || [ ! -d ios ] || [ ! -d web ]; then
+            flutter create --org com.sassystem --project-name sas_system \
+              --platforms android,ios,web --no-pub .
+          fi
+      - id: commit
+        name: Commit generated platform folders
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android ios web .metadata 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: scaffold platform folders (flutter create)"
+            git push
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  analyze:
+    needs: scaffold
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.scaffold.outputs.sha }}
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+      - run: flutter --version
+      - run: flutter pub get
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+      - name: Test
+        run: flutter test
+
+  android:
+    needs: [scaffold, analyze]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.scaffold.outputs.sha }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+      - run: flutter pub get
+      - run: flutter build apk --release $DART_DEFINES
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sas-system-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  ios:
+    needs: [scaffold, analyze]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.scaffold.outputs.sha }}
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+      - run: flutter pub get
+      - name: Build (unsigned)
+        run: flutter build ios --release --no-codesign $DART_DEFINES
+      - name: Zip Runner.app
+        run: cd build/ios/iphoneos && zip -qr ../../../sas-system-ios-unsigned.zip Runner.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sas-system-ios-unsigned
+          path: sas-system-ios-unsigned.zip
+
+  web:
+    needs: [scaffold, analyze]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.scaffold.outputs.sha }}
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+      - run: flutter pub get
+      - name: Build web
+        run: |
+          flutter build web --release \
+            --base-href "/${{ github.event.repository.name }}/" $DART_DEFINES
+          # SPA fallback so deep links like /admin/clients survive a refresh
+          cp build/web/index.html build/web/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy-pages:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: web
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -45,6 +45,10 @@ serve(async (req) => {
       return json({ error: 'Missing required fields: email, full_name, role, company_id' }, 400);
     }
 
+    if (!['admin', 'employee'].includes(role)) {
+      return json({ error: 'Role must be admin or employee' }, 400);
+    }
+
     // Admins can only invite to their own company
     if (callerProfile.role === 'admin' && callerProfile.company_id !== company_id) {
       return json({ error: 'Forbidden: cannot invite to another company' }, 403);
@@ -65,16 +69,20 @@ serve(async (req) => {
 
     if (inviteError) throw new Error(inviteError.message);
 
-    // Create the profile row
+    // Create or complete the profile row. The on_auth_user_created trigger
+    // (migration 20260326400000) has usually already inserted a bare row with
+    // company_id = null, so a plain insert would hit a duplicate key and roll
+    // the invite back. Upsert sets the right company and role either way.
     const { error: profileError } = await adminClient
       .from('users')
-      .insert({
+      .upsert({
         id: inviteData.user.id,
         company_id,
         full_name,
         email,
         role,
-      });
+        is_active: true,
+      }, { onConflict: 'id' });
 
     if (profileError) {
       // Roll back the auth user if profile creation fails
