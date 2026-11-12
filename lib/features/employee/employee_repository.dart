@@ -314,18 +314,9 @@ Future<void> updateVisitNote({
 }
 
 /// Refresh everything a clock action can change, so My Visits, the visit
-/// detail and the Clock tab all update together.
-void invalidateClockState(WidgetRef ref, String scheduleId) {
-  ref.invalidate(openEntryProvider);
-  ref.invalidate(myVisitsProvider);
-  ref.invalidate(todayEntriesProvider);
-  ref.invalidate(visitProvider(scheduleId));
-  ref.invalidate(visitEntriesProvider(scheduleId));
-}
-
-/// Same as [invalidateClockState], for callers that captured the
-/// ProviderContainer before an await (the widget may be gone by then, and
-/// the refresh must still happen).
+/// detail and the Clock tab all update together. Takes the
+/// ProviderContainer (captured before an await) so the refresh still
+/// happens when the calling widget was unmounted meanwhile.
 void invalidateClockStateIn(ProviderContainer container, String scheduleId) {
   container.invalidate(openEntryProvider);
   container.invalidate(myVisitsProvider);

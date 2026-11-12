@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 import '../../../core/providers.dart';
 import '../../../core/supabase.dart';
 import '../../../models/models.dart';
+import '../clients/clients_repository.dart' show clientRecentVisitsProvider;
 
 // ── Date helpers (local time, DST safe) ───────────────────────────────────
 
@@ -303,9 +304,14 @@ final activeServiceTypesProvider =
 final adminDataVersionProvider = StateProvider<int>((ref) => 0);
 
 /// Call after any schedule write so every list and detail refreshes.
-void invalidateScheduleData(WidgetRef ref) {
-  ref.read(adminDataVersionProvider.notifier).state++;
-  ref.invalidate(schedulesInRangeProvider);
-  ref.invalidate(scheduleProvider);
-  ref.invalidate(employeeUpcomingSchedulesProvider);
+/// Takes the ProviderContainer (capture it with ProviderScope.containerOf
+/// before the await) so the refresh still happens when the calling widget
+/// was unmounted while the write was in flight.
+void invalidateScheduleDataIn(ProviderContainer container) {
+  container.read(adminDataVersionProvider.notifier).state++;
+  container.invalidate(schedulesInRangeProvider);
+  container.invalidate(scheduleProvider);
+  container.invalidate(employeeUpcomingSchedulesProvider);
+  container.invalidate(employeeWeekMinutesProvider);
+  container.invalidate(clientRecentVisitsProvider);
 }

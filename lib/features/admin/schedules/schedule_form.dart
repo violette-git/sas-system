@@ -129,6 +129,9 @@ class _ScheduleFormState extends ConsumerState<ScheduleForm> {
       end: _combine(_end),
     );
 
+    // Captured before any await so the refresh still runs if this sheet is
+    // unmounted while the write is in flight.
+    final container = ProviderScope.containerOf(context, listen: false);
     setState(() => _saving = true);
     try {
       // Roadmap "schedule conflicts": warn on overlapping visits.
@@ -170,7 +173,7 @@ class _ScheduleFormState extends ConsumerState<ScheduleForm> {
       } else {
         await repo.create(input);
       }
-      invalidateScheduleData(ref);
+      invalidateScheduleDataIn(container);
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {

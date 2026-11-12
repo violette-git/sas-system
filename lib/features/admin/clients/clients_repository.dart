@@ -11,6 +11,7 @@ import '../../../core/formatters.dart';
 import '../../../core/providers.dart';
 import '../../../core/supabase.dart';
 import '../../../models/models.dart';
+import '../schedules/schedules_repository.dart' show adminDataVersionProvider;
 
 /// An authorization plus how much of it has been delivered.
 /// Mirrors AuthorizationUsage in useAuthorizationTracking.ts.
@@ -126,20 +127,21 @@ class ClientsRepository {
     ];
   }
 
-  /// Schedules whose start_time is between start_date 00:00:00 and
-  /// end_date 23:59:59 (database time zone, UTC on Supabase), same service
-  /// type, same client. Matches the .gte/.lte pair in the Expo hook.
+  /// Schedules whose start_time falls on start_date through end_date in
+  /// LOCAL days (start of start_date inclusive, start of the day after
+  /// end_date exclusive), same service type, same client. DateTime
+  /// comparisons are by instant, so the parsed schedule start compares
+  /// correctly with these local boundaries.
   static int _usedUnits(Authorization a, List<_EntryUnits> entries) {
-    final from =
-        DateTime.utc(a.startDate.year, a.startDate.month, a.startDate.day);
-    final to = DateTime.utc(
-        a.endDate.year, a.endDate.month, a.endDate.day, 23, 59, 59);
+    final start =
+        DateTime(a.startDate.year, a.startDate.month, a.startDate.day);
+    final endExclusive =
+        DateTime(a.endDate.year, a.endDate.month, a.endDate.day + 1);
     var sum = 0;
     for (final e in entries) {
       if (e.serviceTypeId != a.serviceTypeId) continue;
-      if (e.scheduleStart.isBefore(from) || e.scheduleStart.isAfter(to)) {
-        continue;
-      }
+      final s = e.scheduleStart.toLocal();
+      if (s.isBefore(start) || !s.isBefore(endExclusive)) continue;
       sum += e.units;
     }
     return sum;
@@ -267,8 +269,10 @@ final clientRecentVisitsProvider =
   return ref.watch(clientsRepositoryProvider).recentSchedules(clientId);
 });
 
-/// Refreshes every list that shows clients after a create / update.
+/// Refreshes every list that shows clients after a create / update, and
+/// bumps the admin data version so the dashboard refetches its counts.
 void invalidateClients(WidgetRef ref, [String? clientId]) {
+  ref.read(adminDataVersionProvider.notifier).state++;
   ref.invalidate(clientsProvider);
   ref.invalidate(activeClientsProvider);
   if (clientId != null) ref.invalidate(clientProvider(clientId));

@@ -61,10 +61,13 @@ class _ScheduleDetailScreenState extends ConsumerState<ScheduleDetailScreen> {
   }
 
   Future<void> _run(Future<void> Function() action, String success) async {
+    // Captured before the await so the refresh runs even if this screen is
+    // gone by the time the write finishes.
+    final container = ProviderScope.containerOf(context, listen: false);
     setState(() => _busy = true);
     try {
       await action();
-      invalidateScheduleData(ref);
+      invalidateScheduleDataIn(container);
       if (mounted) showSnack(context, success);
     } catch (e) {
       if (mounted) showSnack(context, friendlyError(e), error: true);
@@ -133,10 +136,11 @@ class _ScheduleDetailScreenState extends ConsumerState<ScheduleDetailScreen> {
       destructive: true,
     );
     if (!ok || !mounted) return;
+    final container = ProviderScope.containerOf(context, listen: false);
     setState(() => _busy = true);
     try {
       await ref.read(schedulesRepositoryProvider).delete(s.id);
-      invalidateScheduleData(ref);
+      invalidateScheduleDataIn(container);
       if (!mounted) return;
       showSnack(context, 'Visit deleted');
       _leave();

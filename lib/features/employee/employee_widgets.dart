@@ -170,12 +170,16 @@ class TileActionButton extends StatelessWidget {
                 children: [
                   Icon(icon, color: color, size: 22),
                   const SizedBox(width: Space.sm),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: color,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ],
@@ -445,6 +449,9 @@ Future<bool> runClockIn(
   WidgetRef ref,
   Schedule schedule,
 ) async {
+  // Captured before any await: the refresh below must run even if this
+  // widget is gone by the time the write finishes.
+  final container = ProviderScope.containerOf(context, listen: false);
   final today = startOfToday();
   final start = schedule.startTime;
   final isToday = start.year == today.year &&
@@ -474,7 +481,7 @@ Future<bool> runClockIn(
   } catch (e) {
     if (context.mounted) showSnack(context, friendlyError(e), error: true);
   } finally {
-    if (context.mounted) invalidateClockState(ref, schedule.id);
+    invalidateClockStateIn(container, schedule.id);
   }
   return success;
 }
@@ -486,6 +493,8 @@ Future<bool> runClockOut(
   TimeEntry entry, {
   String? clientName,
 }) async {
+  // Captured before any await, same reason as in runClockIn.
+  final container = ProviderScope.containerOf(context, listen: false);
   final worked = DateTime.now().difference(entry.clockedInAt);
   final ok = await confirmDialog(
     context,
@@ -505,7 +514,7 @@ Future<bool> runClockOut(
   } catch (e) {
     if (context.mounted) showSnack(context, friendlyError(e), error: true);
   } finally {
-    if (context.mounted) invalidateClockState(ref, entry.scheduleId);
+    invalidateClockStateIn(container, entry.scheduleId);
   }
   return success;
 }
