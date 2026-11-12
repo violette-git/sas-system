@@ -69,7 +69,7 @@ class AdminDashboardScreen extends ConsumerWidget {
   List<Widget> _content(BuildContext context, AdminDashboardData d) {
     final visibleToday =
         d.today.where((s) => s.status != ScheduleStatus.cancelled).toList();
-    final lateIds = d.late.map((s) => s.id).toSet();
+    final lateIds = d.lateVisits.map((s) => s.id).toSet();
 
     return [
       StatGrid(children: [
@@ -107,12 +107,12 @@ class AdminDashboardScreen extends ConsumerWidget {
           color: AppColors.pink,
         ),
       ]),
-      if (d.late.isNotEmpty) ...[
+      if (d.lateVisits.isNotEmpty) ...[
         SectionHeader(
           'Needs attention',
-          trailing: Pill('${d.late.length} late', color: AppColors.danger),
+          trailing: Pill('${d.lateVisits.length} late', color: AppColors.danger),
         ),
-        for (final s in d.late)
+        for (final s in d.lateVisits)
           Padding(
             padding: const EdgeInsets.only(bottom: Space.sm),
             child: ScheduleListTile(

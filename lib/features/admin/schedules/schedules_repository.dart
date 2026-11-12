@@ -298,8 +298,13 @@ final activeServiceTypesProvider =
   (ref) => ref.watch(schedulesRepositoryProvider).activeServiceTypes(),
 );
 
+/// Bumped after admin writes so long-lived screens in other tabs (the
+/// dashboard) refetch without importing every feature's providers.
+final adminDataVersionProvider = StateProvider<int>((ref) => 0);
+
 /// Call after any schedule write so every list and detail refreshes.
 void invalidateScheduleData(WidgetRef ref) {
+  ref.read(adminDataVersionProvider.notifier).state++;
   ref.invalidate(schedulesInRangeProvider);
   ref.invalidate(scheduleProvider);
   ref.invalidate(employeeUpcomingSchedulesProvider);

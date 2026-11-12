@@ -209,7 +209,7 @@ class _ScheduleFormState extends ConsumerState<ScheduleForm> {
     final services = servicesAsync.valueOrNull ?? const <ServiceType>[];
 
     // When editing, keep the current selections visible even if that
-    // employee / client / service has since been deactivated.
+    // employee / client / service is no longer in the active lists.
     final s = widget.initial;
     final employeeItems = <DropdownMenuItem<String>>[
       for (final e in employees)
@@ -217,7 +217,7 @@ class _ScheduleFormState extends ConsumerState<ScheduleForm> {
       if (s != null && !employees.any((e) => e.id == s.employeeId))
         DropdownMenuItem(
           value: s.employeeId,
-          child: Text('${s.employeeName ?? 'Current employee'} (inactive)'),
+          child: Text(s.employeeName ?? 'Current employee'),
         ),
     ];
     final clientItems = <DropdownMenuItem<String>>[
@@ -226,7 +226,7 @@ class _ScheduleFormState extends ConsumerState<ScheduleForm> {
       if (s != null && !clients.any((c) => c.id == s.clientId))
         DropdownMenuItem(
           value: s.clientId,
-          child: Text('${s.clientName ?? 'Current client'} (inactive)'),
+          child: Text(s.clientName ?? 'Current client'),
         ),
     ];
     final keepServiceId = s?.serviceTypeId;

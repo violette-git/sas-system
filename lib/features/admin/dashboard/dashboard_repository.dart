@@ -15,7 +15,7 @@ class AdminDashboardData {
     required this.activeEmployees,
     required this.activeClients,
     required this.minutesThisWeek,
-    required this.late,
+    required this.lateVisits,
   });
 
   /// Today's schedules (all statuses), sorted by start time.
@@ -30,11 +30,12 @@ class AdminDashboardData {
   final int minutesThisWeek;
 
   /// Scheduled visits whose start time has passed with no clock-in.
-  final List<Schedule> late;
+  final List<Schedule> lateVisits;
 }
 
 final adminDashboardProvider =
     FutureProvider.autoDispose<AdminDashboardData>((ref) async {
+  ref.watch(adminDataVersionProvider);
   final repo = ref.watch(schedulesRepositoryProvider);
   final companyId = ref.watch(companyIdProvider);
   final now = DateTime.now();
@@ -73,17 +74,17 @@ final adminDashboardProvider =
   final clients = counts[3];
 
   // Late = still "scheduled", start time passed, and no time entry at all.
-  var late = today
+  var lateVisits = today
       .where((s) =>
           s.status == ScheduleStatus.scheduled && s.startTime.isBefore(now))
       .toList();
-  if (late.isNotEmpty) {
+  if (lateVisits.isNotEmpty) {
     final rows = await sb
         .from('time_entries')
         .select('schedule_id')
-        .inFilter('schedule_id', late.map((s) => s.id).toList());
+        .inFilter('schedule_id', lateVisits.map((s) => s.id).toList());
     final clockedIn = rows.map((r) => r['schedule_id'] as String).toSet();
-    late = late.where((s) => !clockedIn.contains(s.id)).toList();
+    lateVisits = lateVisits.where((s) => !clockedIn.contains(s.id)).toList();
   }
 
   return AdminDashboardData(
@@ -92,6 +93,6 @@ final adminDashboardProvider =
     activeEmployees: employees,
     activeClients: clients,
     minutesThisWeek: minutes,
-    late: late,
+    lateVisits: lateVisits,
   );
 });

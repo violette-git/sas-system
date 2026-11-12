@@ -7,6 +7,7 @@ import '../../../core/providers.dart';
 import '../../../core/supabase.dart';
 import '../../../models/models.dart';
 import '../../auth/auth_controller.dart';
+import '../schedules/schedules_repository.dart';
 
 class EmployeesRepository {
   EmployeesRepository({required this.companyId});
@@ -96,6 +97,7 @@ final employeeProvider = FutureProvider.autoDispose.family<UserProfile?, String>
 
 /// Call after any user write.
 void invalidateEmployeeData(WidgetRef ref) {
+  ref.read(adminDataVersionProvider.notifier).state++;
   ref.invalidate(companyUsersProvider);
   ref.invalidate(employeeProvider);
 }

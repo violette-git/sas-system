@@ -31,7 +31,8 @@ class _OwnerCompaniesScreenState extends ConsumerState<OwnerCompaniesScreen> {
 
   Future<void> _refresh() async {
     try {
-      await ref.refresh(ownerCompaniesProvider.future);
+      ref.invalidate(ownerCompaniesProvider);
+      await ref.read(ownerCompaniesProvider.future);
     } catch (_) {
       // The error state renders from the provider.
     }
