@@ -53,6 +53,28 @@ alter table public.time_entries
     ) stored;
 
 
+-- Authorizations: SQL declared authorized_hours, but every client (Expo
+-- and Flutter) reads and writes authorized_units (1 unit = 15 minutes).
+alter table public.authorizations
+  add column if not exists authorized_units int;
+
+do $$ begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'authorizations'
+      and column_name = 'authorized_hours'
+  ) then
+    update public.authorizations
+      set authorized_units = round(authorized_hours * 4)
+      where authorized_units is null and authorized_hours is not null;
+    alter table public.authorizations alter column authorized_hours drop not null;
+  end if;
+end $$;
+
+alter table public.service_types
+  add column if not exists short_code text;
+
+
 -- ── 2. Users may update their own profile ────────────────────
 
 drop policy if exists "self_update_profile" on public.users;
