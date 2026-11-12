@@ -16,6 +16,12 @@ Future<void> main() async {
     await Supabase.initialize(
       url: Env.supabaseUrl,
       anonKey: Env.supabaseAnonKey,
+      // Admin invites (inviteUserByEmail) can only use the implicit flow:
+      // links arrive as #access_token=...&type=invite. PKCE, the Flutter
+      // default, would ignore them and invited users could never sign in.
+      authOptions: const FlutterAuthClientOptions(
+        authFlowType: AuthFlowType.implicit,
+      ),
     );
   }
 

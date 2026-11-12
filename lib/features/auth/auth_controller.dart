@@ -31,6 +31,10 @@ class AuthController extends ChangeNotifier {
   UserProfile? profile;
   Company? company;
 
+  /// Message to show on the login screen after a forced sign-out
+  /// (deactivated account, inactive company). Cleared on next sign-in.
+  String? notice;
+
   /// True until the first auth event has resolved (splash screen).
   bool loading = true;
 
@@ -80,6 +84,14 @@ class AuthController extends ChangeNotifier {
       if (profile == null || profile!.id != s.user.id) {
         await _loadProfile(s.user.id);
       }
+      // A saved session must not outlive a deactivation.
+      final denied = await _accessDenied();
+      if (denied != null) {
+        notice = denied;
+        await sb.auth.signOut().catchError((_) {});
+        _clear();
+        return;
+      }
       loading = false;
       notifyListeners();
     });
@@ -115,6 +127,31 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  /// Asks the server whether this account may use the app. Returns a
+  /// user-facing reason when access is refused, null when allowed or when
+  /// the check could not run (offline: RLS still protects the data).
+  Future<String?> _accessDenied() async {
+    try {
+      final status = await sb.rpc('my_access_status');
+      return switch (status) {
+        'user_inactive' =>
+          'This account is deactivated. Contact your administrator.',
+        'company_inactive' => 'This company account is inactive.',
+        'no_profile' => 'User profile not found. Contact your administrator.',
+        _ => null,
+      };
+    } catch (_) {
+      // Older database without my_access_status(): fall back to the profile.
+      if (profile != null && !profile!.isActive) {
+        return 'This account is deactivated. Contact your administrator.';
+      }
+      if (company != null && !company!.isActive) {
+        return 'This company account is inactive.';
+      }
+      return null;
+    }
+  }
+
   Future<void> refreshProfile() async {
     final id = session?.user.id;
     if (id == null) return;
@@ -134,6 +171,8 @@ class AuthController extends ChangeNotifier {
           'App is not configured: SUPABASE_URL / SUPABASE_ANON_KEY missing.');
     }
     _signingIn = true;
+    needsPasswordSetup = false; // a stale invite/recovery flag must not stick
+    notice = null;
     final code = accessCode.trim();
     try {
       // 1. Authenticate.
@@ -197,6 +236,14 @@ class AuthController extends ChangeNotifier {
       notifyListeners();
       return null;
     } catch (e) {
+      // Never leave a half-validated session behind: it would skip the
+      // company-code check on the next token refresh or app launch.
+      if (sb.auth.currentSession != null) {
+        await sb.auth.signOut().catchError((_) {});
+      }
+      session = null;
+      profile = null;
+      company = null;
       return SignInError(SignInField.general, friendlyError(e));
     } finally {
       _signingIn = false;
@@ -253,6 +300,17 @@ class AuthController extends ChangeNotifier {
     _sub?.cancel();
     super.dispose();
   }
+}
+
+/// Where invite emails send the invitee. Always the web app: the invitee
+/// may not have the mobile app installed, and an admin inviting from a
+/// phone must not produce a phone-only deep link.
+String inviteRedirectUrl() {
+  if (Env.webAppUrl.isNotEmpty) {
+    final base = Env.webAppUrl.endsWith('/') ? Env.webAppUrl : '${Env.webAppUrl}/';
+    return '${base}set-password';
+  }
+  return authRedirectUrl('set-password');
 }
 
 /// Where auth emails should send the user back to.

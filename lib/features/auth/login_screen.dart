@@ -77,6 +77,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final general = _errorFor(SignInField.general);
+    // Set when a saved session was ended because the account or company
+    // was deactivated.
+    final notice = ref.watch(authProvider).notice;
 
     return AuthScaffold(
       title: 'Welcome back',
@@ -95,7 +98,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (general != null) AuthBanner(message: general),
+              if (general != null)
+                AuthBanner(message: general)
+              else if (notice != null)
+                AuthBanner(
+                  message: notice,
+                  color: AppColors.warning,
+                  icon: Icons.lock_outline,
+                ),
               AppField(
                 controller: _code,
                 label: 'Company code',

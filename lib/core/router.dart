@@ -77,7 +77,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       final loc = state.matchedLocation;
       const public = {Routes.login, Routes.forgotPassword};
 
-      if (auth.loading) return loc == Routes.splash ? null : Routes.splash;
+      // Remember where the user was headed (web refresh, deep link) so we
+      // can return there once the session has been restored.
+      if (auth.loading) {
+        if (loc == Routes.splash) return null;
+        final from = Uri.encodeComponent(state.uri.toString());
+        return '${Routes.splash}?from=$from';
+      }
 
       // Invite / recovery: signed in via the email link, must pick a password.
       if (auth.needsPasswordSetup && auth.session != null) {
@@ -90,6 +96,13 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final role = auth.role!;
       final home = Routes.homeFor(role);
+      if (loc == Routes.splash) {
+        final from = state.uri.queryParameters['from'];
+        if (from != null && from.startsWith(Routes.prefixFor(role))) {
+          return from;
+        }
+        return home;
+      }
       if (public.contains(loc) ||
           loc == Routes.splash ||
           loc == Routes.setPassword ||

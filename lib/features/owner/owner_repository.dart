@@ -152,7 +152,7 @@ class OwnerRepository {
       'full_name': fullName.trim(),
       'role': role == UserRole.admin ? 'admin' : 'employee',
       'company_id': companyId,
-      'redirect_to': authRedirectUrl('set-password'),
+      'redirect_to': inviteRedirectUrl(),
     });
     final data = res.data;
     if (data is Map && data['error'] != null) {
